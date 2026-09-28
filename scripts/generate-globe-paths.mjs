@@ -1,0 +1,206 @@
+/**
+ * Precompute Natural Earth land/borders + 195-country markers & links.
+ * Run: node scripts/generate-globe-paths.mjs
+ */
+import { readFileSync, writeFileSync, mkdirSync } from 'node:fs'
+import { fileURLToPath } from 'node:url'
+import { dirname, join } from 'node:path'
+import { feature, mesh } from 'topojson-client'
+import { geoEquirectangular, geoPath } from 'd3-geo'
+import countries from 'world-countries'
+
+const root = join(dirname(fileURLToPath(import.meta.url)), '..')
+const W = 1000
+const H = 500
+
+const countriesTopo = JSON.parse(
+  readFileSync(join(root, 'node_modules/world-atlas/countries-110m.json'), 'utf8'),
+)
+const landTopo = JSON.parse(
+  readFileSync(join(root, 'node_modules/world-atlas/land-110m.json'), 'utf8'),
+)
+
+const projection = geoEquirectangular().fitExtent(
+  [
+    [0, 0],
+    [W, H],
+  ],
+  { type: 'Sphere' },
+)
+const path = geoPath(projection)
+
+const land = feature(landTopo, landTopo.objects.land)
+const borders = mesh(countriesTopo, countriesTopo.objects.countries, (a, b) => a !== b)
+const coastline = mesh(landTopo, landTopo.objects.land)
+
+/** Top-20: show text labels */
+const MAJOR = new Set([
+  'US', 'CN', 'JP', 'DE', 'IN', 'GB', 'FR', 'IT', 'BR', 'CA',
+  'RU', 'KR', 'AU', 'ES', 'MX', 'ID', 'NL', 'SA', 'TR', 'CH',
+])
+
+/**
+ * Top-50 economies (approx. GDP) — hubs get larger dots.
+ * Interconnect arcs use only the first 25 (sparser).
+ */
+const TOP50 = [
+  'US', 'CN', 'DE', 'JP', 'IN', 'GB', 'FR', 'IT', 'BR', 'CA',
+  'RU', 'MX', 'KR', 'AU', 'ES', 'ID', 'NL', 'TR', 'SA', 'CH',
+  'PL', 'BE', 'SE', 'AR', 'IE', 'AT', 'NO', 'IL', 'AE', 'TH',
+  'SG', 'MY', 'NG', 'PH', 'VN', 'BD', 'EG', 'ZA', 'PK', 'DK',
+  'CO', 'CL', 'FI', 'RO', 'CZ', 'NZ', 'PT', 'PE', 'GR', 'IQ',
+]
+const TOP50_SET = new Set(TOP50)
+const LINK_SET = new Set(TOP50.slice(0, 25))
+
+/** Prefer visually readable points over raw centroids for large countries */
+const COORD_OVERRIDES = {
+  US: [-98.5, 39.5],
+  CN: [104.0, 35.0],
+  RU: [90.0, 60.0],
+  CA: [-106.0, 56.0],
+  BR: [-51.0, -10.0],
+  AU: [134.0, -25.0],
+  FR: [2.3, 46.5],
+  GB: [-1.5, 52.5],
+  IN: [78.0, 22.0],
+  ID: [117.0, -2.0],
+  MX: [-102.0, 24.0],
+  SA: [45.0, 24.5],
+}
+
+const SHORT_EN = {
+  US: 'USA',
+  GB: 'UK',
+  KR: 'Korea',
+  SA: 'Saudi',
+  CH: 'Swiss',
+  AE: 'UAE',
+  NZ: 'NZ',
+  ZA: 'S. Africa',
+  CD: 'DRC',
+  BO: 'Bolivia',
+  VE: 'Venezuela',
+  IR: 'Iran',
+  SY: 'Syria',
+  LA: 'Laos',
+  MD: 'Moldova',
+  MK: 'N. Macedonia',
+  CZ: 'Czechia',
+  SK: 'Slovakia',
+  BA: 'BiH',
+  CF: 'CAR',
+  DO: 'Dominican',
+  GQ: 'Eq. Guinea',
+  PG: 'PNG',
+  SB: 'Solomons',
+  ST: 'São Tomé',
+  TT: 'Trinidad',
+  PS: 'Palestine',
+}
+
+/** 193 UN members + Palestine (common “195 countries” set in marketing) */
+const selected = countries
+  .filter((c) => c.unMember || c.cca2 === 'PS')
+  .sort((a, b) => a.name.common.localeCompare(b.name.common))
+
+if (selected.length !== 195) {
+  console.warn('Expected 195 countries, got', selected.length)
+}
+
+const countryLabels = selected.map((c) => {
+  const id = c.cca2.toLowerCase()
+  const [lat, lon] = c.latlng
+  const override = COORD_OVERRIDES[c.cca2]
+  const lng = override ? override[0] : lon
+  const la = override ? override[1] : lat
+  const [x, y] = projection([lng, la])
+  return {
+    id,
+    zh: c.translations.zho.common,
+    en: SHORT_EN[c.cca2] || c.name.common,
+    major: MAJOR.has(c.cca2),
+    hub: TOP50_SET.has(c.cca2),
+    link: LINK_SET.has(c.cca2),
+    x: Math.round(x * 100) / 100,
+    y: Math.round(y * 100) / 100,
+  }
+})
+
+/** Long-haul arcs only among top-50 economies */
+const MIN_DIST = 120
+const PER_NODE = 1
+const LONG_CLASS = 520
+
+function pushLink(i, j, seen, out) {
+  const key = i < j ? `${i}-${j}` : `${j}-${i}`
+  if (seen.has(key)) return
+  seen.add(key)
+  const a = countryLabels[i]
+  const b = countryLabels[j]
+  const dx = b.x - a.x
+  const dy = b.y - a.y
+  const len = Math.hypot(dx, dy) || 1
+  const mx = (a.x + b.x) / 2
+  const my = (a.y + b.y) / 2
+  const bend = Math.min(72, Math.max(22, len * 0.28))
+  const cx = mx - (dy / len) * bend
+  const cy = my + (dx / len) * bend
+  out.push({
+    id: key,
+    d: `M${a.x},${a.y} Q${cx},${cy} ${b.x},${b.y}`,
+    long: len > LONG_CLASS,
+  })
+}
+
+const hubIdx = countryLabels.map((c, i) => (c.link ? i : -1)).filter((i) => i >= 0)
+if (hubIdx.length !== 25) {
+  console.warn('Expected 25 link hubs, got', hubIdx.length)
+}
+
+const seen = new Set()
+const countryLinks = []
+
+for (const i of hubIdx) {
+  const far = hubIdx
+    .filter((j) => j !== i)
+    .map((j) => ({
+      j,
+      d: Math.hypot(countryLabels[j].x - countryLabels[i].x, countryLabels[j].y - countryLabels[i].y),
+    }))
+    .filter((x) => x.d >= MIN_DIST)
+    .sort((a, b) => b.d - a.d)
+  let added = 0
+  for (const { j } of far) {
+    if (added >= PER_NODE) break
+    const before = seen.size
+    pushLink(i, j, seen, countryLinks)
+    if (seen.size > before) added += 1
+  }
+}
+
+const outDir = join(root, 'src/data')
+mkdirSync(outDir, { recursive: true })
+
+const content = `/* Auto-generated by scripts/generate-globe-paths.mjs — do not edit by hand */
+export const MAP_W = ${W}
+export const MAP_H = ${H}
+export const landPath = ${JSON.stringify(path(land) || '')}
+export const borderPath = ${JSON.stringify(path(borders) || '')}
+export const coastPath = ${JSON.stringify(path(coastline) || '')}
+export const countryLabels = ${JSON.stringify(countryLabels)}
+export const countryLinks = ${JSON.stringify(countryLinks)}
+`
+
+writeFileSync(join(outDir, 'globePaths.js'), content)
+console.log(
+  'Wrote src/data/globePaths.js',
+  'labels',
+  countryLabels.length,
+  'hubs',
+  countryLabels.filter((c) => c.hub).length,
+  'links',
+  countryLinks.length,
+  'major',
+  countryLabels.filter((c) => c.major).length,
+)
