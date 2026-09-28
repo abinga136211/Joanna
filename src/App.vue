@@ -23,6 +23,8 @@ watch(
 
 /** Intercept plain <a href="/..."> from migrated HTML so SPA navigation works */
 function onAppClick(e) {
+  // RouterLink already handled this click — don't push again
+  if (e.defaultPrevented) return
   const a = e.target.closest('a')
   if (!a) return
   if (a.hasAttribute('download') || a.target === '_blank') return
@@ -33,9 +35,15 @@ function onAppClick(e) {
     // in-page hash only
     return
   }
-  if (href.startsWith('/') || href.startsWith('#')) {
+  // Strip Vite base (e.g. /Joanna/) so router.push matches route paths
+  const base = import.meta.env.BASE_URL || '/'
+  let path = href
+  if (base !== '/' && path.startsWith(base)) {
+    path = `/${path.slice(base.length)}`
+  }
+  if (path.startsWith('/') || path.startsWith('#')) {
     e.preventDefault()
-    router.push(href)
+    router.push(path)
   }
 }
 </script>
