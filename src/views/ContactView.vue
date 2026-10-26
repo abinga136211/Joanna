@@ -3,12 +3,41 @@ import { ref, computed } from 'vue'
 import { useLocaleStore } from '@/stores/locale'
 import { apiFetch } from '@/api/client'
 import { useSiteConfig } from '@/composables/useSiteConfig'
+import AppointmentDateField from '@/components/contact/AppointmentDateField.vue'
 
 const locale = useLocaleStore()
+const contactHeroSrc = `${import.meta.env.BASE_URL}images/contact-hero.jpg`
+const contactHeroWebp = `${import.meta.env.BASE_URL}images/contact-hero.webp`
 const formRef = ref(null)
 const submitting = ref(false)
 const msg = ref({ show: false, text: '', ok: true })
+const appointmentDateIso = ref('')
+const appointmentDateInvalid = ref(false)
 const { config: siteConfig } = useSiteConfig({ intervalMs: 2000 })
+
+const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+
+function pickLocalized(item, field) {
+  const lang = locale.language === 'en' || locale.language === 'tw' ? locale.language : 'zh'
+  return (
+    item?.[`${field}_${lang}`] ||
+    item?.[`${field}_zh`] ||
+    item?.[`${field}_en`] ||
+    ''
+  )
+}
+
+const contactItems = computed(() =>
+  (siteConfig.value.items || []).map((item) => {
+    const value = String(pickLocalized(item, 'value') || '').trim()
+    return {
+      id: item.id,
+      name: pickLocalized(item, 'name'),
+      value,
+      isEmail: EMAIL_RE.test(value),
+    }
+  }),
+)
 
 const FM = {
   zh: {
@@ -42,6 +71,35 @@ const FM = {
 
 const copy = computed(() => FM[locale.language] || FM.zh)
 
+/** Mon–Fri business slots aligned with contact aside hours (HKT). */
+const appointmentSlots = [
+  '09:00–10:00',
+  '10:00–11:00',
+  '11:00–12:00',
+  '12:00–13:00',
+  '13:00–14:00',
+  '14:00–15:00',
+  '15:00–16:00',
+  '16:00–17:00',
+  '17:00–18:00',
+]
+
+function todayIso() {
+  const d = new Date()
+  const y = d.getFullYear()
+  const m = String(d.getMonth() + 1).padStart(2, '0')
+  const day = String(d.getDate()).padStart(2, '0')
+  return `${y}-${m}-${day}`
+}
+
+function buildAppointmentAt(date, slot) {
+  const d = String(date || '').trim()
+  const s = String(slot || '').trim()
+  if (!d && !s) return ''
+  if (d && s) return `${d} ${s}`
+  return d || s
+}
+
 async function onSubmit(e) {
   e.preventDefault()
   const form = formRef.value
@@ -57,9 +115,16 @@ async function onSubmit(e) {
     }
   })
   const email = form.querySelector('#email')
-  if (email?.value && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.value)) {
+  if (email?.value && !EMAIL_RE.test(email.value)) {
     ok = false
     email.style.borderColor = 'var(--red-500)'
+  }
+  let appointmentIso = String(appointmentDateIso.value || '').trim()
+  if (appointmentIso && appointmentIso < todayIso()) {
+    ok = false
+    appointmentDateInvalid.value = true
+  } else {
+    appointmentDateInvalid.value = false
   }
   if (!ok) {
     msg.value = { show: true, text: copy.value.err, ok: false }
@@ -76,11 +141,13 @@ async function onSubmit(e) {
         phone: String(fd.get('phone') || '').trim(),
         email: String(fd.get('email') || '').trim(),
         industry: String(fd.get('industry') || '').trim(),
+        appointment_at: buildAppointmentAt(appointmentIso, fd.get('appointment_slot')),
         message: String(fd.get('message') || '').trim(),
       },
     })
     msg.value = { show: true, text: copy.value.success, ok: true }
     form.reset()
+    appointmentDateIso.value = ''
   } catch (err) {
     msg.value = {
       show: true,
@@ -94,30 +161,32 @@ async function onSubmit(e) {
 </script>
 
 <template>
-<section class="hero hero-page">
-<div class="container">
-<div class="hero-page-layout">
-<div class="hero-page-copy">
-<span class="hero-page-kicker" data-en="Local Team Service" data-zh="本地团队服务" data-tw="本地團隊服務">本地团队服务</span>
-<h1 data-en="Contact Us" data-zh="联系我们" data-tw="聯繫我們">联系我们</h1>
-<p class="lead" data-en="Whether for onboarding consultation or business cooperation, leave your information and our team will contact you soon." data-zh="无论是开户咨询还是商务合作，留下信息，我们的团队会尽快与你联系。" data-tw="無論是開戶諮詢還是商務合作，留下信息，我們的團隊會儘快與你聯繫。">无论是开户咨询还是商务合作，留下信息，我们的团队会尽快与你联系。</p>
-<a class="btn btn-primary btn-lg" href="#contact-form" data-en="Leave Your Details" data-zh="留下你的需求" data-tw="留下你的需求">留下你的需求</a>
-</div>
-<div class="hero-page-media">
-<figure class="hero-page-figure">
-<img
-  class="hero-page-img"
-  src="/images/contact-hero.jpg"
-  alt="Business cooperation and contact"
-  width="960"
-  height="720"
-  loading="eager"
-  decoding="async"
-/>
-</figure>
-</div>
-</div>
-</div>
+<!-- 联系页根节点：整页连续背景，柔化深色 Hero 与内容硬切 -->
+<div class="contact-page">
+<section class="hero hero-page hero-page--cover">
+  <div class="hero-page-media" aria-hidden="true">
+    <picture>
+      <source :srcset="contactHeroWebp" type="image/webp" />
+      <img
+        class="hero-page-img"
+        :src="contactHeroSrc"
+        alt=""
+        width="960"
+        height="720"
+        loading="eager"
+        fetchpriority="high"
+        decoding="async"
+      />
+    </picture>
+  </div>
+  <div class="hero-page-veil" aria-hidden="true"></div>
+  <div class="container">
+    <div class="hero-page-copy">
+      <h1 data-en="Contact Us" data-zh="联系我们" data-tw="聯繫我們">联系我们</h1>
+      <p class="lead" data-en="Enter your details and our team will get back to you soon." data-zh="填入信息，我们的团队会尽快与你联系。" data-tw="填入信息，我們的團隊會儘快與你聯繫。">填入信息，我们的团队会尽快与你联系。</p>
+      <a class="hero-page-text-link" href="#contact-form" data-en="Leave Your Valuable Feedback" data-zh="留下您宝贵意见" data-tw="留下您寶貴意見">留下您宝贵意见</a>
+    </div>
+  </div>
 </section>
 
 <section class="section contact-section">
@@ -125,10 +194,15 @@ async function onSubmit(e) {
 <div class="contact-layout">
 <aside class="contact-aside">
 <div class="contact-block">
-<span class="contact-kicker" data-en="Customer Support" data-zh="客服支持" data-tw="客服支持">客服支持</span>
-<div class="contact-row">
-<span class="contact-label" data-en="Email" data-zh="邮箱" data-tw="郵箱">邮箱</span>
-<a class="contact-value" :href="'mailto:' + siteConfig.customer_email">{{ siteConfig.customer_email }}</a>
+<span class="contact-kicker" data-en="Contact Details" data-zh="联系方式" data-tw="聯繫方式">联系方式</span>
+<div v-for="item in contactItems" :key="item.id" class="contact-row">
+<span class="contact-label">{{ item.name }}</span>
+<a
+  v-if="item.isEmail"
+  class="contact-value"
+  :href="'mailto:' + item.value"
+>{{ item.value }}</a>
+<span v-else class="contact-value contact-value--wrap">{{ item.value }}</span>
 </div>
 <div class="contact-row">
 <span class="contact-label" data-en="Service Hours" data-zh="服务时间" data-tw="服務時間">服务时间</span>
@@ -137,23 +211,10 @@ async function onSubmit(e) {
 </div>
 
 <div class="contact-block" id="bilingual">
-<span class="contact-kicker" data-en="Bilingual Support" data-zh="中英双语支持" data-tw="中英雙語支持">中英双语支持</span>
 <p data-en="The support team can handle onboarding consultation, KYC document communication, global account application, collection verification, currency exchange and payment status follow-up in Chinese and English." data-zh="支持团队可使用中文与英文处理开户咨询、KYC 资料沟通、全球账户申请、收款核对、币种兑换及付款状态跟进。" data-tw="支持團隊可使用中文與英文處理開戶諮詢、KYC 資料溝通、全球賬戶申請、收款核對、幣種兌換及付款狀態跟進。">支持团队可使用中文与英文处理开户咨询、KYC 资料沟通、全球账户申请、收款核对、币种兑换及付款状态跟进。</p>
 <div class="contact-row">
 <span class="contact-label" data-en="Service Method" data-zh="服务方式" data-tw="服務方式">服务方式</span>
 <span class="contact-value" data-en="Chinese / English Email &amp; Online Communication" data-zh="中文 / 英文邮件与在线沟通" data-tw="中文 / 英文郵件與在線溝通">中文 / 英文邮件与在线沟通</span>
-</div>
-</div>
-
-<div class="contact-block">
-<span class="contact-kicker" data-en="Business Cooperation" data-zh="商务合作" data-tw="商務合作">商务合作</span>
-<div class="contact-row">
-<span class="contact-label" data-en="Partnership Email" data-zh="合作邮箱" data-tw="合作郵箱">合作邮箱</span>
-<a class="contact-value" :href="'mailto:' + siteConfig.partnership_email">{{ siteConfig.partnership_email }}</a>
-</div>
-<div class="contact-row">
-<span class="contact-label" data-en="Office Address" data-zh="办公地址" data-tw="辦公地址">办公地址</span>
-<span class="contact-value contact-value--wrap">{{ siteConfig.office_address }}</span>
 </div>
 </div>
 
@@ -162,7 +223,7 @@ async function onSubmit(e) {
 
 <div class="contact-form-wrap" id="contact-form">
 <form ref="formRef" class="form contact-form" novalidate @submit="onSubmit">
-<h2 data-en="Leave Your Details" data-zh="留下你的需求" data-tw="留下你的需求">留下你的需求</h2>
+<h2 data-en="Leave Your Valuable Feedback" data-zh="留下您宝贵意见" data-tw="留下您寶貴意見">留下您宝贵意见</h2>
 <p class="contact-form-lead" data-en="Fields marked with an asterisk (*) are required." data-zh="带 * 为必填项。" data-tw="帶 * 爲必填項。">带 <span class="req">*</span> 为必填项。</p>
 <div class="field">
 <label for="name"><span data-en="Name" data-zh="姓名" data-tw="姓名">姓名</span> <span class="req">*</span></label>
@@ -186,12 +247,25 @@ async function onSubmit(e) {
 <label data-en="Industry / Use Case" data-zh="行业场景" data-tw="行業場景" for="industry">行业场景</label>
 <select id="industry" name="industry">
 <option data-en="Please select" data-zh="请选择" data-tw="請選擇" value="">请选择</option>
-<option value="ecommerce" data-en="Cross-border E-commerce" data-zh="跨境电商" data-tw="跨境電商">跨境电商</option>
-<option value="trade" data-en="Cross-border Trade (B2B)" data-zh="外贸出口（B2B）" data-tw="外貿出口（B2B）">外贸出口（B2B）</option>
-<option value="saas" data-en="SaaS / Software" data-zh="软件服务" data-tw="軟件服務">软件服务</option>
-<option value="other" data-en="Other" data-zh="其他" data-tw="其他">其他</option>
+<option value="goods" data-en="Goods Trade" data-zh="货物贸易" data-tw="貨物貿易">货物贸易</option>
+<option value="services" data-en="Services Trade" data-zh="服务贸易" data-tw="服務貿易">服务贸易</option>
+<option value="fx" data-en="Flexible FX" data-zh="灵活换汇" data-tw="靈活換匯">灵活换汇</option>
 </select>
 </div>
+<div class="row-2">
+<div class="field">
+<label for="appointment_date"><span data-en="Preferred Date" data-zh="预约日期" data-tw="預約日期">预约日期</span></label>
+<AppointmentDateField v-model="appointmentDateIso" :invalid="appointmentDateInvalid" />
+</div>
+<div class="field">
+<label data-en="Preferred Time" data-zh="预约时段" data-tw="預約時段" for="appointment_slot">预约时段</label>
+<select id="appointment_slot" name="appointment_slot">
+<option data-en="Please select" data-zh="请选择" data-tw="請選擇" value="">请选择</option>
+<option v-for="slot in appointmentSlots" :key="slot" :value="slot">{{ slot }}</option>
+</select>
+</div>
+</div>
+<p class="contact-form-hint" data-en="Optional. Business hours: Mon–Fri 9:00–18:00 (Hong Kong Time)." data-zh="选填。服务时间：周一至周五 9:00–18:00（香港时间）。" data-tw="選填。服務時間：周一至周五 9:00–18:00（香港時間）。">选填。服务时间：周一至周五 9:00–18:00（香港时间）。</p>
 <div class="field">
 <label for="message"><span data-en="Inquiry Details" data-zh="需求说明" data-tw="需求說明">需求说明</span> <span class="req">*</span></label>
 <textarea data-en-ph="Briefly describe your collection/payment scenario and needs" data-zh-ph="请简要描述您的收款/付款场景与需求" data-tw-ph="請簡要描述您的收款/付款場景與需求" id="message" name="message" placeholder="请简要描述您的收款/付款场景与需求" required></textarea>
@@ -214,4 +288,5 @@ async function onSubmit(e) {
 </div>
 </div>
 </section>
+</div>
 </template>

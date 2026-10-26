@@ -67,9 +67,24 @@ const routes = [
         component: () => import('@/views/admin/AdminConfigView.vue'),
       },
       {
+        path: 'faq-topics',
+        name: 'admin-faq-topics',
+        component: () => import('@/views/admin/AdminFaqTopicsView.vue'),
+      },
+      {
+        path: 'chat-qa',
+        name: 'admin-chat-qa',
+        component: () => import('@/views/admin/AdminChatQaView.vue'),
+      },
+      {
         path: 'inquiries',
         name: 'admin-inquiries',
         component: () => import('@/views/admin/AdminInquiriesView.vue'),
+      },
+      {
+        path: 'email-logs',
+        name: 'admin-email-logs',
+        component: () => import('@/views/admin/AdminEmailLogsView.vue'),
       },
       {
         path: 'jobs',
@@ -83,7 +98,12 @@ const routes = [
       },
     ],
   },
-  { path: '/:pathMatch(.*)*', redirect: '/' },
+  {
+    path: '/:pathMatch(.*)*',
+    name: 'not-found',
+    component: () => import('@/views/NotFoundView.vue'),
+    meta: { view: 'notFound' },
+  },
 ]
 
 const router = createRouter({
@@ -93,8 +113,10 @@ const router = createRouter({
     if (to.hash) {
       return new Promise((resolve) => {
         setTimeout(() => {
-          resolve({ el: to.hash, behavior: 'smooth', top: 84 })
-        }, 50)
+          const el = document.querySelector(to.hash)
+          if (el) resolve({ el: to.hash, behavior: 'smooth', top: 84 })
+          else resolve({ top: 0 })
+        }, 320)
       })
     }
     return { top: 0 }

@@ -96,7 +96,7 @@ adminRouter.get('/applications', requireAuth, (req, res) => {
     params.push(Number(job_id))
   }
   const sql = `
-    SELECT a.*, j.title AS job_title
+    SELECT a.*, COALESCE(NULLIF(j.title_zh, ''), j.title) AS job_title
     FROM applications a
     LEFT JOIN jobs j ON j.id = a.job_id
     ${where.length ? `WHERE ${where.join(' AND ')}` : ''}
@@ -107,7 +107,7 @@ adminRouter.get('/applications', requireAuth, (req, res) => {
 adminRouter.get('/applications/:id', requireAuth, (req, res) => {
   const row = getDb()
     .prepare(
-      `SELECT a.*, j.title AS job_title
+      `SELECT a.*, COALESCE(NULLIF(j.title_zh, ''), j.title) AS job_title
        FROM applications a
        LEFT JOIN jobs j ON j.id = a.job_id
        WHERE a.id = ?`,

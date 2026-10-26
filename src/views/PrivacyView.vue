@@ -5,6 +5,8 @@ import { apiFetch } from '@/api/client'
 import { useAutoRefresh } from '@/composables/useAutoRefresh'
 
 const locale = useLocaleStore()
+const careerHeroSrc = `${import.meta.env.BASE_URL}images/career-hero.jpg`
+const careerHeroWebp = `${import.meta.env.BASE_URL}images/career-hero.webp`
 
 const jobs = ref([])
 const jobsLoading = ref(true)
@@ -163,10 +165,20 @@ const LABEL_PACKS = {
 
 const labels = computed(() => LABEL_PACKS[lang.value] || LABEL_PACKS.zh)
 
+function jobField(job, field) {
+  if (!job) return ''
+  const code = lang.value
+  const preferred = job[`${field}_${code}`]
+  if (Array.isArray(preferred) && preferred.length) return preferred
+  if (typeof preferred === 'string' && preferred.trim()) return preferred
+  const zh = job[`${field}_zh`] ?? job[field]
+  return zh ?? (field === 'responsibilities' || field === 'requirements' ? [] : '')
+}
+
 const applyJobTitle = computed(() => {
   if (!applyJobId.value) return ''
   const job = jobs.value.find((j) => j.id === applyJobId.value)
-  return job?.title || ''
+  return jobField(job, 'title') || ''
 })
 
 const bioLen = computed(() => applyForm.value.bio.length)
@@ -300,125 +312,71 @@ async function onApplySubmit(e) {
 </script>
 
 <template>
-<section class="hero hero-page">
-<div class="container">
-<div class="hero-page-layout">
-<div class="hero-page-copy">
-<span class="hero-page-kicker" data-en="Careers" data-zh="就业机会" data-tw="就業機會">就业机会</span>
-<h1 data-en="Join Us" data-zh="加入我们" data-tw="加入我們">加入我们</h1>
-<p class="lead" data-en="ADG PAY looks for people who share our values. Join us to build licensed, transparent cross-border payment solutions and help enterprises collect and settle with confidence." data-zh="ADG PAY 一直寻找认同我们价值观的人才。加入我们，共同打造持牌、透明的跨境支付方案，帮助企业更安心地收款与结算。" data-tw="ADG PAY 一直尋找認同我們價值觀的人才。加入我們，共同打造持牌、透明的跨境支付方案，幫助企業更安心地收款與結算。">ADG PAY 一直寻找认同我们价值观的人才。加入我们，共同打造持牌、透明的跨境支付方案，帮助企业更安心地收款与结算。</p>
-<div class="career-hero-cta">
-<a class="btn btn-primary btn-lg" href="#openings" data-en="Open Roles" data-zh="职位空缺" data-tw="職位空缺">职位空缺</a>
-<a class="btn btn-outline btn-lg" href="/contact" data-en="Contact Us" data-zh="联系我们" data-tw="聯繫我們">联系我们</a>
-</div>
-</div>
-<div class="hero-page-media">
-<figure class="hero-page-figure">
-<img
-  class="hero-page-img"
-  src="/images/career-hero.jpg"
-  alt=""
-  width="960"
-  height="720"
-  loading="eager"
-  decoding="async"
-/>
-</figure>
-</div>
-</div>
-</div>
+<!-- 加入我们页根节点：整页连续背景，柔化深色 Hero 与白/灰硬切 -->
+<div class="privacy-page">
+<section class="hero hero-page hero-page--cover">
+  <div class="hero-page-media" aria-hidden="true">
+    <picture>
+      <source :srcset="careerHeroWebp" type="image/webp" />
+      <img
+        class="hero-page-img"
+        :src="careerHeroSrc"
+        alt=""
+        width="960"
+        height="720"
+        loading="eager"
+        fetchpriority="high"
+        decoding="async"
+      />
+    </picture>
+  </div>
+  <div class="hero-page-veil" aria-hidden="true"></div>
+  <div class="container">
+    <div class="hero-page-copy">
+      <h1 data-en="Join Us" data-zh="加入我们" data-tw="加入我們">加入我们</h1>
+      <div class="career-hero-cta">
+        <a class="btn btn-primary btn-lg" href="#openings" data-en="Open Roles" data-zh="职位空缺" data-tw="職位空缺">职位空缺</a>
+        <a class="btn btn-outline-white btn-lg" href="/contact" data-en="Contact Us" data-zh="联系我们" data-tw="聯繫我們">联系我们</a>
+      </div>
+    </div>
+  </div>
 </section>
 
-<section class="section career-section">
+<section class="section career-section" id="values">
 <div class="container">
 <div class="career-intro career-intro--left">
-<h2 data-en="Our Values" data-zh="我们的价值观" data-tw="我們的價值觀">我们的价值观</h2>
-<p data-en="With expertise in payments and compliance, we stay close to real cross-border needs and deliver practical, innovative solutions for enterprises." data-zh="我们凭着在支付与合规方面的专业能力，贴近跨境企业真实需求，提供务实创新的解决方案，帮助客户提升竞争力。" data-tw="我們憑着在支付與合規方面的專業能力，貼近跨境企業真實需求，提供務實創新的解決方案，幫助客戶提升競爭力。">我们凭着在支付与合规方面的专业能力，贴近跨境企业真实需求，提供务实创新的解决方案，帮助客户提升竞争力。</p>
-</div>
-<div class="career-value-grid">
-<article class="career-value">
-<span class="career-icon" aria-hidden="true">
-<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="8"/><path d="M12 8v4l2.5 2.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
-</span>
-<h3 data-en="Vision" data-zh="愿景" data-tw="願景">愿景</h3>
-<p data-en="Make cross-border collection and settlement simpler through licensed, stable payment capabilities." data-zh="通过持牌、稳定的支付能力，让跨境收款与结算更简单。" data-tw="通過持牌、穩定的支付能力，讓跨境收款與結算更簡單。">通过持牌、稳定的支付能力，让跨境收款与结算更简单。</p>
-</article>
-<article class="career-value">
-<span class="career-icon" aria-hidden="true">
-<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 3l2.2 4.5 5 .7-3.6 3.5.8 5L12 14.8 7.6 16.7l.8-5L4.8 8.2l5-.7L12 3z" stroke-linejoin="round"/></svg>
-</span>
-<h3 data-en="Innovation" data-zh="创新" data-tw="創新">创新</h3>
-<p data-en="We keep refining products and experience so clients get clearer flows and better tools." data-zh="持续打磨产品与体验，让客户拥有更清晰的流程与更好用的工具。" data-tw="持續打磨產品與體驗，讓客戶擁有更清晰的流程與更好用的工具。">持续打磨产品与体验，让客户拥有更清晰的流程与更好用的工具。</p>
-</article>
-<article class="career-value">
-<span class="career-icon" aria-hidden="true">
-<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 3l7 3v5c0 4.5-3 7.5-7 9-4-1.5-7-4.5-7-9V6l7-3z" stroke-linejoin="round"/><path d="M9.5 12l1.8 1.8L14.8 10" stroke-linecap="round" stroke-linejoin="round"/></svg>
-</span>
-<h3 data-en="Reliability" data-zh="可靠" data-tw="可靠">可靠</h3>
-<p data-en="Compliance, security and transparent fees are the foundation of every client relationship." data-zh="合规、安全与透明费率，是我们与客户长期合作的基础。" data-tw="合規、安全與透明費率，是我們與客戶長期合作的基礎。">合规、安全与透明费率，是我们与客户长期合作的基础。</p>
-</article>
-<article class="career-value">
-<span class="career-icon" aria-hidden="true">
-<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 19V5M4 19h16" stroke-linecap="round"/><path d="M8 15V9M12 15V7M16 15v-3" stroke-linecap="round"/></svg>
-</span>
-<h3 data-en="Commitment" data-zh="决心" data-tw="決心">决心</h3>
-<p data-en="We face challenges together, stay pragmatic, and deliver results clients can trust." data-zh="面对挑战保持务实与协作，把结果做到客户信得过。" data-tw="面對挑戰保持務實與協作，把結果做到客戶信得過。">面对挑战保持务实与协作，把结果做到客户信得过。</p>
-</article>
+<h2 data-en="Corporate Values" data-zh="企业价值观" data-tw="企業價值觀">企业价值观</h2>
+<p data-en="Grounded in payments and compliance expertise, we match real cross-border business scenarios and deliver practical, innovative solutions—empowering SMEs to strengthen market competitiveness, advancing together toward shared, win-win value." data-zh="以支付与合规专业能力为基石，匹配跨境企业真实业务场景，输出务实创新解决方案，赋能中小企业强化市场竞争力，同心致远，共创价值双赢。" data-tw="以支付與合規專業能力為基石，匹配跨境企業真實業務場景，輸出務實創新解決方案，賦能中小企業強化市場競爭力，同心致遠，共創價值雙贏。">以支付与合规专业能力为基石，匹配跨境企业真实业务场景，输出务实创新解决方案，赋能中小企业强化市场竞争力，同心致远，共创价值双赢。</p>
 </div>
 </div>
 </section>
 
-<section class="section career-section career-section--soft">
+<section class="section career-section career-section--soft" id="benefits">
 <div class="container">
-<div class="career-head">
-<h2 data-en="Benefits" data-zh="津贴和福利" data-tw="津貼和福利">津贴和福利</h2>
+<div class="career-package">
+<div class="career-package-copy">
+<span class="career-package-kicker" data-en="Join Us" data-zh="加入我们" data-tw="加入我們">加入我们</span>
+<h2 data-en="Career Package" data-zh="职业待遇" data-tw="職業待遇">职业待遇</h2>
+<p data-en="We invest in people with clear benefits, competitive pay and a focused workplace." data-zh="以清晰福利、有竞争力的薪酬与专注的办公环境，持续投入人才发展。" data-tw="以清晰福利、有競爭力的薪酬與專注的辦公環境，持續投入人才發展。">以清晰福利、有竞争力的薪酬与专注的办公环境，持续投入人才发展。</p>
 </div>
-<div class="career-benefit-grid">
-<article class="career-benefit">
-<span class="career-icon" aria-hidden="true">
-<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 10l8-6 8 6v9a1 1 0 01-1 1h-5v-5H10v5H5a1 1 0 01-1-1v-9z" stroke-linejoin="round"/></svg>
-</span>
-<strong data-en="Location" data-zh="地点" data-tw="地點">地点</strong>
-<span data-en="Hong Kong office in a convenient business district" data-zh="香港甲级写字楼，交通便利" data-tw="香港甲級寫字樓，交通便利">香港甲级写字楼，交通便利</span>
-</article>
-<article class="career-benefit">
-<span class="career-icon" aria-hidden="true">
-<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 21s-7-4.5-7-10a4 4 0 017-2.6A4 4 0 0119 11c0 5.5-7 10-7 10z" stroke-linejoin="round"/></svg>
-</span>
-<strong data-en="Insurance" data-zh="保险" data-tw="保險">保险</strong>
-<span data-en="Medical coverage for eligible employees" data-zh="合资格员工享有医疗保障" data-tw="合資格員工享有醫療保障">合资格员工享有医疗保障</span>
-</article>
-<article class="career-benefit">
-<span class="career-icon" aria-hidden="true">
-<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="4" y="7" width="16" height="12" rx="2"/><path d="M8 7V5a4 4 0 018 0v2" stroke-linecap="round"/><circle cx="12" cy="13" r="1.5"/></svg>
-</span>
-<strong data-en="Bonus" data-zh="奖金" data-tw="獎金">奖金</strong>
-<span data-en="Discretionary year-end bonus" data-zh="酌情年终奖金" data-tw="酌情年終獎金">酌情年终奖金</span>
-</article>
-<article class="career-benefit">
-<span class="career-icon" aria-hidden="true">
-<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 19V5M4 19h16" stroke-linecap="round"/><path d="M8 15l3-4 3 2 4-6" stroke-linecap="round" stroke-linejoin="round"/></svg>
-</span>
-<strong data-en="Career" data-zh="职业发展" data-tw="職業發展">职业发展</strong>
-<span data-en="Clear growth path in payments and compliance" data-zh="支付与合规领域的成长空间" data-tw="支付與合規領域的成長空間">支付与合规领域的成长空间</span>
-</article>
+<ol class="career-package-grid">
+<li>
+<span class="career-package-index" aria-hidden="true">01</span>
+<strong data-en="Leave &amp; Benefits" data-zh="假期与福利" data-tw="假期與福利">假期与福利</strong>
+<p data-en="Aligned with leading multinational standards, with a comprehensive leave and benefits system." data-zh="对标大型外企标准，提供完善假期与福利体系" data-tw="對標大型外企標準，提供完善假期與福利體系">对标大型外企标准，提供完善假期与福利体系</p>
+</li>
+<li>
+<span class="career-package-index" aria-hidden="true">02</span>
+<strong data-en="Pay &amp; Incentives" data-zh="薪酬激励" data-tw="薪酬激勵">薪酬激励</strong>
+<p data-en="Competitive compensation and performance incentives." data-zh="配备富有市场竞争力的薪酬与绩效激励机制" data-tw="配備富有市場競爭力的薪酬與績效激勵機制">配备富有市场竞争力的薪酬与绩效激励机制</p>
+</li>
+<li>
+<span class="career-package-index" aria-hidden="true">03</span>
+<strong data-en="Workplace" data-zh="办公环境" data-tw="辦公環境">办公环境</strong>
+<p data-en="Premium office space for a comfortable, efficient work environment." data-zh="高端写字楼办公，营造舒适高效的工作环境" data-tw="高端寫字樓辦公，營造舒適高效的工作環境">高端写字楼办公，营造舒适高效的工作环境</p>
+</li>
+</ol>
 </div>
-</div>
-</section>
-
-<section class="section career-section">
-<div class="container">
-<div class="career-head career-head--left">
-<h2 data-en="Our Business" data-zh="我们的业务" data-tw="我們的業務">我们的业务</h2>
-<p data-en="Serving cross-border enterprises from Hong Kong across key corridors." data-zh="立足香港，服务跨境企业的主要市场与资金走廊。" data-tw="立足香港，服務跨境企業的主要市場與資金走廊。">立足香港，服务跨境企业的主要市场与资金走廊。</p>
-</div>
-<ul class="career-markets">
-<li data-en="Hong Kong" data-zh="香港" data-tw="香港">香港</li>
-<li data-en="Mainland China" data-zh="中国内地" data-tw="中國內地">中国内地</li>
-<li data-en="Southeast Asia" data-zh="东南亚" data-tw="東南亞">东南亚</li>
-<li data-en="Singapore" data-zh="新加坡" data-tw="新加坡">新加坡</li>
-<li data-en="Global corridors" data-zh="全球主要走廊" data-tw="全球主要走廊">全球主要走廊</li>
-</ul>
 </div>
 </section>
 
@@ -446,13 +404,13 @@ async function onApplySubmit(e) {
 >
 <button type="button" class="career-job-toggle" @click="toggleExpand(job.id)">
 <span class="career-job-main">
-<span class="career-job-title">{{ job.title }}</span>
+<span class="career-job-title">{{ jobField(job, 'title') }}</span>
 <span class="career-job-meta">
-<span>{{ job.work_location }}</span>
-<span v-if="job.job_type" aria-hidden="true">·</span>
-<span v-if="job.job_type">{{ job.job_type }}</span>
-<span v-if="job.experience" aria-hidden="true">·</span>
-<span v-if="job.experience">{{ labels.experience }} {{ job.experience }}</span>
+<span>{{ jobField(job, 'work_location') }}</span>
+<span v-if="jobField(job, 'job_type')" aria-hidden="true">·</span>
+<span v-if="jobField(job, 'job_type')">{{ jobField(job, 'job_type') }}</span>
+<span v-if="jobField(job, 'experience')" aria-hidden="true">·</span>
+<span v-if="jobField(job, 'experience')">{{ labels.experience }} {{ jobField(job, 'experience') }}</span>
 </span>
 </span>
 <span class="career-job-chevron" aria-hidden="true"></span>
@@ -461,13 +419,13 @@ async function onApplySubmit(e) {
 <div class="career-job-block">
 <h4>{{ labels.responsibilities }}</h4>
 <ul>
-<li v-for="(item, i) in job.responsibilities" :key="'r-' + job.id + '-' + i">{{ item }}</li>
+<li v-for="(item, i) in jobField(job, 'responsibilities')" :key="'r-' + job.id + '-' + i">{{ item }}</li>
 </ul>
 </div>
 <div class="career-job-block">
 <h4>{{ labels.requirements }}</h4>
 <ul>
-<li v-for="(item, i) in job.requirements" :key="'q-' + job.id + '-' + i">{{ item }}</li>
+<li v-for="(item, i) in jobField(job, 'requirements')" :key="'q-' + job.id + '-' + i">{{ item }}</li>
 </ul>
 </div>
 <a class="btn btn-primary" href="#" @click.prevent="openApply(job.id)">{{ labels.apply }}</a>
@@ -483,6 +441,7 @@ async function onApplySubmit(e) {
 </div>
 </div>
 </section>
+</div>
 
 <Teleport to="body">
 <div

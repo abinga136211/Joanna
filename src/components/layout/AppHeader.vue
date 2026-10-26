@@ -1,7 +1,8 @@
 <script setup>
-import { ref, watch, onMounted, onBeforeUnmount } from 'vue'
+import { ref, computed, watch, onMounted, onBeforeUnmount } from 'vue'
 import { RouterLink, useRoute } from 'vue-router'
 import { useLocaleStore } from '@/stores/locale'
+import { useNavLinks } from '@/composables/useNavLinks'
 
 const locale = useLocaleStore()
 const route = useRoute()
@@ -9,29 +10,50 @@ const open = ref(false)
 const scrolled = ref(false)
 const langOpen = ref(false)
 const langWrap = ref(null)
+const openSub = ref('')
+const { links } = useNavLinks()
 
-const links = [
-  { key: 'home', to: '/' },
-  { key: 'products', to: '/products' },
-  { key: 'about', to: '/about' },
-  { key: 'compliance', to: '/compliance' },
-  { key: 'faq', to: '/faq' },
-  { key: 'contact', to: '/contact' },
-  { key: 'privacy', to: '/privacy' },
-]
+const overHero = computed(() =>
+  route.path === '/compliance' ||
+  route.path === '/faq' ||
+  route.path === '/contact' ||
+  route.path === '/privacy',
+)
+const logoSrc = `${import.meta.env.BASE_URL}images/logo/adg-logo.png?v=4`
 
 function isActive(to) {
-  if (to === '/') return route.path === '/'
-  return route.path === to || route.path.startsWith(`${to}/`)
+  const path = to.split('#')[0] || to
+  if (path === '/') return route.path === '/'
+  return route.path === path || route.path.startsWith(`${path}/`)
+}
+
+function childLabel(child) {
+  return locale.t(child.zh, child.en, child.tw)
 }
 
 function toggleMenu() {
   open.value = !open.value
   langOpen.value = false
+  openSub.value = ''
 }
 
 function closeMenu() {
   open.value = false
+  openSub.value = ''
+}
+
+function toggleSub(key) {
+  openSub.value = openSub.value === key ? '' : key
+}
+
+function onParentEnter(key) {
+  if (window.matchMedia('(max-width: 760px)').matches) return
+  openSub.value = key
+}
+
+function onNavLeave() {
+  if (window.matchMedia('(max-width: 760px)').matches) return
+  openSub.value = ''
 }
 
 function toggleLangMenu() {
@@ -56,14 +78,16 @@ function onScroll() {
 }
 
 function onDocClick(e) {
-  if (!langOpen.value) return
-  if (langWrap.value && !langWrap.value.contains(e.target)) {
+  if (langOpen.value && langWrap.value && !langWrap.value.contains(e.target)) {
     langOpen.value = false
   }
 }
 
 function onDocKey(e) {
-  if (e.key === 'Escape') langOpen.value = false
+  if (e.key === 'Escape') {
+    langOpen.value = false
+    openSub.value = ''
+  }
 }
 
 onMounted(() => {
@@ -80,30 +104,62 @@ onBeforeUnmount(() => {
 </script>
 
 <template>
-  <header class="nav" :class="{ open, scrolled }" id="nav">
+  <header class="nav" :class="{ open, scrolled, 'nav-over-hero': overHero }" id="nav">
     <div class="container nav-inner">
       <RouterLink aria-label="ADG PAY首页" class="brand" to="/" @click="closeMenu">
-        <span class="logo-mark">ADG</span>
-        <span>ADG PAY<small>{{ locale.brandTag() }}</small></span>
+        <img class="logo-mark" :src="logoSrc" alt="ADG" width="110" height="28" />
+        <span>ADG Pay</span>
       </RouterLink>
 
       <div class="nav-right">
-        <nav aria-label="主导航">
+        <nav aria-label="主导航" @mouseleave="onNavLeave">
           <ul class="nav-links">
-            <li v-for="link in links" :key="link.key">
+            <li
+              v-for="link in links"
+              :key="link.key"
+              class="nav-item"
+              :class="{ 'has-sub': !!link.children?.length, open: openSub === link.key }"
+              @mouseenter="link.children?.length && onParentEnter(link.key)"
+            >
+              <div v-if="link.children?.length" class="nav-parent">
+                <RouterLink
+                  class="nav-link"
+                  :class="{ active: isActive(link.to) }"
+                  :to="link.to"
+                  @click="closeMenu"
+                >
+                  {{ locale.navLabel(link.key) }}
+                </RouterLink>
+                <button
+                  type="button"
+                  class="nav-caret"
+                  :aria-expanded="openSub === link.key"
+                  :aria-label="locale.t('展开子菜单', 'Open submenu', '展開子選單')"
+                  @click.stop="toggleSub(link.key)"
+                ></button>
+              </div>
               <RouterLink
+                v-else
+                class="nav-link"
                 :class="{ active: isActive(link.to) }"
                 :to="link.to"
                 @click="closeMenu"
               >
                 {{ locale.navLabel(link.key) }}
               </RouterLink>
+              <ul v-if="link.children?.length" class="nav-sub">
+                <li v-for="child in link.children" :key="child.to">
+                  <RouterLink :to="child.to" @click="closeMenu">
+                    {{ childLabel(child) }}
+                  </RouterLink>
+                </li>
+              </ul>
             </li>
           </ul>
         </nav>
         <div class="nav-cta">
           <RouterLink class="btn btn-primary btn-sm" to="/contact" @click="closeMenu">
-            {{ locale.contactCta() }}
+            {{ locale.navLabel('contact') }}
           </RouterLink>
           <div ref="langWrap" class="lang-switch" :class="{ open: langOpen }">
             <button

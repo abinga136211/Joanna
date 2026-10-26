@@ -6,6 +6,9 @@ import { useAutoRefresh } from '@/composables/useAutoRefresh'
 
 const TABLE_META = [
   { key: 'system_config', title: '系统配置' },
+  { key: 'faq_topics', title: '帮助中心子分类' },
+  { key: 'faq_articles', title: '帮助中心文案' },
+  { key: 'chat_qa_items', title: '客服问答' },
   { key: 'inquiries', title: '咨询' },
   { key: 'jobs', title: '岗位' },
   { key: 'applications', title: '投递' },
@@ -14,13 +17,31 @@ const TABLE_META = [
 const LONG_COLS = new Set([
   'message',
   'responsibilities',
+  'responsibilities_zh',
+  'responsibilities_en',
+  'responsibilities_tw',
   'requirements',
+  'requirements_zh',
+  'requirements_en',
+  'requirements_tw',
   'bio',
-  'office_address',
+  'value_zh',
+  'value_en',
+  'value_tw',
+  'description_zh',
+  'description_en',
+  'description_tw',
+  'body_zh',
+  'body_en',
+  'body_tw',
+  'answer_zh',
+  'answer_en',
+  'answer_tw',
+  'keywords',
 ])
 const DATE_COLS = new Set(['created_at', 'updated_at'])
 
-const includeDeleted = ref(true)
+const includeDeleted = ref(false)
 const loading = ref(false)
 const msg = ref('')
 const payload = ref(null)
@@ -38,20 +59,53 @@ const colLabels = {
   phone: '电话 / 手机',
   email: '邮箱',
   industry: '行业',
+  appointment_at: '预约时间',
   message: '需求说明',
   is_read: '已读',
   is_deleted: '已删',
   created_at: '创建时间',
   updated_at: '更新时间',
-  customer_email: '客户邮箱',
-  partnership_email: '合作邮箱',
-  office_address: '办公地址',
+  name_zh: '名称(简)',
+  name_en: '名称(英)',
+  name_tw: '名称(繁)',
+  value_zh: '内容(简)',
+  value_en: '内容(英)',
+  value_tw: '内容(繁)',
+  sort_order: '排序',
+  slug: '锚点',
+  topic_id: '子分类ID',
+  topic_slug: '子分类锚点',
+  topic_title_zh: '子分类',
+  body_zh: '文案(简)',
+  body_en: '文案(英)',
+  body_tw: '文案(繁)',
+  description_zh: '简介(简)',
+  description_en: '简介(英)',
+  description_tw: '简介(繁)',
   title: '岗位名称',
+  title_zh: '标题(简)',
+  title_en: '标题(英)',
+  title_tw: '标题(繁)',
   job_type: '类型',
+  job_type_zh: '类型(简)',
+  job_type_en: '类型(英)',
+  job_type_tw: '类型(繁)',
   experience: '经验',
+  experience_zh: '经验(简)',
+  experience_en: '经验(英)',
+  experience_tw: '经验(繁)',
   work_location: '地址',
+  work_location_zh: '地址(简)',
+  work_location_en: '地址(英)',
+  work_location_tw: '地址(繁)',
   responsibilities: '职责',
+  responsibilities_zh: '职责(简)',
+  responsibilities_en: '职责(英)',
+  responsibilities_tw: '职责(繁)',
   requirements: '要求',
+  requirements_zh: '要求(简)',
+  requirements_en: '要求(英)',
+  requirements_tw: '要求(繁)',
   status: '状态',
   job_id: '岗位ID',
   job_title: '岗位',
@@ -84,7 +138,18 @@ function display(col, value) {
   if (col === 'gender') return value === 'male' ? '男' : value === 'female' ? '女' : value
   if (col === 'industry') {
     return (
-      { ecommerce: '跨境电商', trade: '外贸出口', saas: '软件服务', other: '其他' }[value] || value
+      {
+        goods: '货物贸易',
+        services: '服务贸易',
+        fx: '灵活换汇',
+        b2b: '外贸 B2B 供应链企业',
+        digital: '服务贸易与数字企业',
+        family: '投资控股与家族办公室',
+        ecommerce: '外贸 B2B 供应链企业',
+        trade: '外贸 B2B 供应链企业',
+        saas: '服务贸易与数字企业',
+        other: '其他',
+      }[value] || value
     )
   }
   if (DATE_COLS.has(col)) return formatDateTime(value)
@@ -97,7 +162,7 @@ async function load() {
   if (firstLoad.value) loading.value = true
   msg.value = ''
   try {
-    const q = includeDeleted.value ? '' : '?include_deleted=0'
+    const q = includeDeleted.value ? '?include_deleted=1' : ''
     payload.value = await apiFetch(`/api/admin/tables${q}`)
   } catch (err) {
     msg.value = err.message || '加载失败'
@@ -132,6 +197,18 @@ useAutoRefresh(load, { intervalMs: 2000 })
         <span>配置行</span>
       </div>
       <div class="admin-stat">
+        <strong>{{ summary.faq_topics }}</strong>
+        <span>帮助中心子分类</span>
+      </div>
+      <div class="admin-stat">
+        <strong>{{ summary.faq_articles }}</strong>
+        <span>帮助中心文案</span>
+      </div>
+      <div class="admin-stat">
+        <strong>{{ summary.chat_qa_items ?? 0 }}</strong>
+        <span>客服问答</span>
+      </div>
+      <div class="admin-stat">
         <strong>{{ summary.inquiries }}</strong>
         <span>咨询（未读 {{ summary.inquiries_unread }}）</span>
       </div>
@@ -162,15 +239,6 @@ useAutoRefresh(load, { intervalMs: 2000 })
     </div>
 
     <div v-if="current" class="admin-table-scroll">
-      <p
-        v-if="active === 'system_config' && current.effective"
-        class="admin-muted"
-        style="margin-bottom: 0.75rem"
-      >
-        官网生效：{{ current.effective.customer_email }} ／
-        {{ current.effective.partnership_email }} ／
-        {{ current.effective.office_address }}
-      </p>
       <table class="admin-table admin-table--browse">
         <thead>
           <tr>

@@ -4,6 +4,7 @@ import { RouterView, useRoute, useRouter } from 'vue-router'
 import AppHeader from '@/components/layout/AppHeader.vue'
 import AppFooter from '@/components/layout/AppFooter.vue'
 import CookieConsent from '@/components/layout/CookieConsent.vue'
+import ChatAssistant from '@/components/chat/ChatAssistant.vue'
 import { useLocaleStore } from '@/stores/locale'
 
 const locale = useLocaleStore()
@@ -67,6 +68,7 @@ function onAppClick(e) {
       </main>
       <AppFooter />
       <CookieConsent />
+      <ChatAssistant />
     </template>
   </div>
 </template>

@@ -1,405 +1,488 @@
 <script setup>
-import { ref, computed, watch } from 'vue'
+import { ref, computed } from 'vue'
+import { RouterLink } from 'vue-router'
+import WhyGlobe from '@/components/home/WhyGlobe.vue'
 import HeroVisual from '@/components/home/HeroVisual.vue'
 import FlagMarquee from '@/components/home/FlagMarquee.vue'
-import WhyGlobe from '@/components/home/WhyGlobe.vue'
 import { useScrollReveal } from '@/composables/useScrollReveal'
 import { useLocaleStore } from '@/stores/locale'
 
 const root = ref(null)
 useScrollReveal(root)
 
+const assetBase = import.meta.env.BASE_URL
 const locale = useLocaleStore()
-const productTab = ref('methods') // methods | scenarios
-const openProduct = ref(-1)
-
 const t = (...args) => locale.t(...args)
 
-const methodItems = computed(() => [
+/** 首页产品能力卡片 → 产品页对应锚点；专属咨询 → 联系我们 */
+const productCards = computed(() => [
   {
-    key: 'receive',
-    title: t('跨境收款', 'Cross-border Collection', '跨境收款'),
+    key: 'match',
+    theme: 'match',
+    to: '/products#solutions',
+    title: t('渠道匹配', 'Corridor Matching', '渠道匹配'),
     desc: t(
-      '为全球买家提供本地收款账户，用本地币种收款，减少中转与汇损。',
-      'Provide local collection accounts for global buyers to receive funds in local currencies, reducing intermediaries and FX loss.',
-      '為全球買家提供本地收款賬戶，用本地幣種收款，減少中轉與匯損。',
+      '快速匹配收款与持牌通道',
+      'Match the right collection and licensed payment corridors',
+      '快速匹配收款與持牌通道',
     ),
-    href: '/products#receive',
-    visual: {
-      tag: t('本地收款', 'Local collection', '本地收款'),
-      headline: t('本地币种收款入账', 'Receive in local currency', '本地幣種收款入賬'),
-      metric: 'USD → HKD',
-      detail: t('减少中转与汇损', 'Fewer hops, less FX loss', '減少中轉與匯損'),
-    },
+    showCtaText: false,
   },
   {
-    key: 'settle',
-    title: t('多币种结算', 'Multi-currency Settlement', '多幣種結算'),
+    key: 'collect',
+    theme: 'collect',
+    to: '/products#collect',
+    title: t('全球收款', 'Global Collection', '全球收款'),
     desc: t(
-      '持有并管理多种币种余额，按需结算，灵活把握换汇时点。',
-      'Hold and manage multiple currency balances, settle on demand, and flexibly time your currency exchange.',
-      '持有並管理多種幣種餘額，按需結算，靈活把握換匯時點。',
+      '覆盖超20+国家收款和15类币种',
+      'Collect in 20+ markets across 15+ currencies',
+      '覆蓋超20+國家收款和15類幣種',
     ),
-    href: '/products#settle',
-    visual: {
-      tag: t('多币种', 'Multi-currency', '多幣種'),
-      headline: t('持有余额，按需结算', 'Hold & settle on demand', '持有餘額，按需結算'),
-      metric: 'USD · EUR · HKD',
-      detail: t('灵活把握换汇时点', 'Time your FX with flexibility', '靈活把握換匯時點'),
-    },
-  },
-  {
-    key: 'va',
-    title: t('虚拟账户', 'Virtual Accounts', '虛擬賬戶'),
-    desc: t(
-      '为每个业务线开立独立虚拟账户，资金清晰可分，对账更高效。',
-      'Open independent virtual accounts for each business line, keeping funds clearly separable and reconciliation more efficient.',
-      '為每個業務線開立獨立虛擬賬戶，資金清晰可分，對賬更高效。',
-    ),
-    href: '/products#va',
-    visual: {
-      tag: t('虚拟账户', 'Virtual account', '虛擬賬戶'),
-      headline: t('一业务线一账户', 'One line, one ledger', '一業務線一賬戶'),
-      metric: 'VA-001 · VA-002',
-      detail: t('对账更高效', 'Clearer reconciliation', '對賬更高效'),
-    },
+    showCtaText: false,
   },
   {
     key: 'pay',
-    title: t('供应商付款', 'Supplier Payments', '供應商付款'),
+    theme: 'pay',
+    to: '/products#pay',
+    title: t('国际付款', 'International Payouts', '國際付款'),
     desc: t(
-      '向海外供应商批量付款，支持多币种，流程留痕、合规可查。',
-      'Make batch payments to overseas suppliers in multiple currencies, with traceable processes and compliant records.',
-      '向海外供應商批量付款，支持多幣種，流程留痕、合規可查。',
+      '向全球供应商与合作伙伴高效完成合规付款',
+      'Pay suppliers and partners worldwide through compliant payout rails',
+      '向全球供應商與合作夥伴高效完成合規付款',
     ),
-    href: '/products#pay',
-    visual: {
-      tag: t('批量付款', 'Batch payout', '批量付款'),
-      headline: t('向海外供应商付款', 'Pay suppliers globally', '向海外供應商付款'),
-      metric: 'Batch · Multi-CCY',
-      detail: t('流程留痕、合规可查', 'Traceable & compliant', '流程留痕、合規可查'),
-    },
+    showCtaText: false,
+  },
+  {
+    key: 'fx',
+    theme: 'fx',
+    to: '/products#fx',
+    title: t('灵活换汇', 'Flexible FX', '靈活換匯'),
+    desc: t(
+      '主流币种 7×24 在线换汇，实时报价与全流程风控',
+      '24/7 FX in major currencies—live rates with end-to-end risk controls',
+      '主流幣種 7×24 在線換匯，實時報價與全流程風控',
+    ),
+    showCtaText: false,
+  },
+  {
+    key: 'consult',
+    theme: 'consult',
+    to: '/contact',
+    title: t('专属咨询', 'Dedicated Advisory', '專屬諮詢'),
+    desc: t(
+      '一对一专属顾问，定制个性化跨境资金方案',
+      'Dedicated advisors who design tailored cross-border payment solutions',
+      '一對一專屬顧問，定制個性化跨境資金方案',
+    ),
+    showCtaText: false,
   },
 ])
 
-const scenarioItems = computed(() => [
-  {
-    key: 'ecommerce',
-    title: t('跨境电商', 'Cross-border E-commerce', '跨境電商'),
-    subtitle: t('平台收款与回款', 'Platform Collection & Payout', '平台收款與回款'),
-    desc: t(
-      '对接主流电商平台收款，本地币种入账，回国结算更顺。',
-      'Connect with major e-commerce platforms for collection, credit in local currency, and smoother repatriation settlement.',
-      '對接主流電商平台收款，本地幣種入賬，回國結算更順。',
-    ),
-    features: t(
-      ['多店铺统一归集', '本地收款账户'],
-      ['Unified Multi-store Aggregation', 'Local Collection Account'],
-      ['多店鋪統一歸集', '本地收款賬戶'],
-    ),
-    href: '/products',
-    visual: {
-      tag: t('跨境电商', 'E-commerce', '跨境電商'),
-      headline: t('平台收款与回款', 'Platform Collection & Payout', '平台收款與回款'),
-      metric: 'Multi-store',
-      detail: t('本地币种入账，回国结算更顺', 'Local currency in, smoother repatriation', '本地幣種入賬，回國結算更順'),
+/** 编号列表：点击困局下滑展开对应方案 */
+const compareImageSrc = `${assetBase}images/career-hero.jpg`
+const openCompareNum = ref('')
+function toggleCompare(num) {
+  openCompareNum.value = openCompareNum.value === num ? '' : num
+}
+const compareItems = computed(() => {
+  const rows = [
+    {
+      num: '01',
+      titleZh: '开户困局',
+      titleTw: '開戶困局',
+      titleEn: 'Onboarding Friction',
+      text: t(
+        '漫长的开户排期、反复的合规问询、多头对接的沟通成本',
+        'Long onboarding queues, repeated compliance follow-ups, and the cost of juggling multiple counterparties',
+        '漫長的開戶排期、反復的合規問詢、多頭對接的溝通成本',
+      ),
+      solutionZh: '专属咨询',
+      solutionTw: '專屬諮詢',
+      solutionEn: 'Dedicated Advisory',
+      solutionText: t(
+        '签署保密协议，深入梳理您的业务模式、交易币种、额度与目的地，直接呈上有效的渠道，匹配最适合您背景的账户。',
+        'Under NDA, we map your business model, currencies, volumes and destinations—then recommend licensed corridors and accounts that fit your profile.',
+        '簽署保密協議，深入梳理您的業務模式、交易幣種、額度與目的地，直接呈上有效的渠道，匹配最適合您背景的賬戶。',
+      ),
     },
-  },
-  {
-    key: 'trade',
-    title: t('外贸出口', 'Cross-border Trade / Export', '外貿出口'),
-    subtitle: t('B2B 贸易收付款', 'Cross-border Trade B2B', 'B2B 貿易收付款'),
-    desc: t(
-      '面向海外买家的电汇收款与供应商付款，单证与流水清晰可查。',
-      'Wire collection from overseas buyers and supplier payments, with clear documents and transaction records.',
-      '面向海外買家的電匯收款與供應商付款，單證與流水清晰可查。',
-    ),
-    features: t(
-      ['电汇收款', '批量付供应商'],
-      ['Wire Collection', 'Batch Supplier Payments'],
-      ['電匯收款', '批量付供應商'],
-    ),
-    href: '/products',
-    visual: {
-      tag: t('外贸出口', 'B2B Trade', '外貿出口'),
-      headline: t('B2B 贸易收付款', 'B2B pay-in & pay-out', 'B2B 貿易收付款'),
-      metric: 'Wire · Batch',
-      detail: t('单证与流水清晰可查', 'Clear documents & records', '單證與流水清晰可查'),
+    {
+      num: '02',
+      titleZh: '渠道单一',
+      titleTw: '渠道單一',
+      titleEn: 'Single-Corridor Constraints',
+      text: t(
+        '单一机构的汇率、时效与风控，难以满足多元且动态的资金需求。',
+        'Relying on one institution for FX, settlement speed and risk controls rarely covers diverse, fast-changing payment needs.',
+        '單一機構的匯率、時效與風控，難以滿足多元且動態的資金需求。',
+      ),
+      solutionZh: '渠道匹配',
+      solutionTw: '渠道匹配',
+      solutionEn: 'Corridor Matching',
+      solutionText: t(
+        '为您搭建 “1+N” 多渠道组合，自由路由、分散风险、捕捉最优资金路径；推荐最优产品与解决方案和全程服务。',
+        'We design a “1+N” corridor mix with intelligent routing, diversified risk and optimal settlement paths—then recommend the right products with end-to-end support.',
+        '為您搭建「1+N」多渠道組合，自由路由、分散風險、捕捉最優資金路徑；推薦最優產品與解決方案和全程服務。',
+      ),
     },
-  },
-  {
-    key: 'saas',
-    title: t('SaaS / 软件', 'SaaS / Software', 'SaaS / 軟件'),
-    subtitle: t('订阅与全球收款', 'Subscriptions & Global Collection', '訂閱與全球收款'),
-    desc: t(
-      '支持全球用户以本地方式付费，统一归集到多币种账户。',
-      'Let global users pay locally, with funds unified into multi-currency accounts.',
-      '支持全球用戶以本地方式付費，統一歸集到多幣種賬戶。',
-    ),
-    features: t(
-      ['订阅收款', '自动化对账'],
-      ['Subscription Collection', 'Automated Reconciliation'],
-      ['訂閱收款', '自動化對賬'],
-    ),
-    href: '/products',
-    visual: {
-      tag: t('软件服务', 'SaaS', '軟件服務'),
-      headline: t('订阅与全球收款', 'Subscriptions & Global Collection', '訂閱與全球收款'),
-      metric: 'Global → Multi-CCY',
-      detail: t('本地付费，统一归集', 'Local pay-in, unified accounts', '本地付費，統一歸集'),
+    {
+      num: '03',
+      titleZh: '服务真空',
+      titleTw: '服務真空',
+      titleEn: 'Service Gaps',
+      text: t(
+        '邮件来回数天、问题跟进缓慢，关键时刻求助无门',
+        'Email threads drag on for days, follow-ups stall, and there is no one to call when it matters',
+        '郵件來回數天、問題跟進緩慢，關鍵時刻求助無門',
+      ),
+      solutionZh: '持续运营',
+      solutionTw: '持續運營',
+      solutionEn: 'Ongoing Operations',
+      solutionText: t(
+        '每位客户配备专属资金管家，直接对接决策层，渠道问题 24 小时内介入协调；账户启用后持续提供多币种收款、跨境付款与渠道关系维护。',
+        'Every client has a dedicated relationship manager with direct access to decision-makers; corridor issues are escalated within 24 hours. After go-live we continue to support multi-currency collection, cross-border payouts and partner relationships.',
+        '每位客戶配備專屬資金管家，直接對接決策層，渠道問題 24 小時內介入協調；賬戶啟用後持續提供多幣種收款、跨境付款與渠道關係維護。',
+      ),
     },
-  },
-])
-
-const products = computed(() =>
-  productTab.value === 'scenarios' ? scenarioItems.value : methodItems.value,
-)
-
-const ctaHref = computed(() => {
-  const list = products.value
-  return list[openProduct.value]?.href || list[0]?.href || '/products'
+  ]
+  return rows.map((item) => {
+    const isEn = locale.language === 'en'
+    const zh = locale.language === 'tw' ? item.titleTw : item.titleZh
+    const primary = isEn ? item.titleEn : zh
+    const solutionZh = locale.language === 'tw' ? item.solutionTw : item.solutionZh
+    const solutionPrimary = isEn ? item.solutionEn : solutionZh
+    // 简中 / 繁中仅显示对应文案，不附带英文副标题
+    return {
+      num: item.num,
+      primary,
+      secondary: '',
+      text: item.text,
+      solutionPrimary,
+      solutionSecondary: '',
+      solutionText: item.solutionText,
+    }
+  })
 })
 
-function setTab(tab) {
-  productTab.value = tab
-  openProduct.value = -1
-}
-
-function selectProduct(index) {
-  openProduct.value = openProduct.value === index ? -1 : index
-}
-
-watch(
-  () => locale.language,
-  () => {
-    openProduct.value = -1
+/** 首页通道能力区：关键数据 */
+const channelStats = computed(() => [
+  {
+    value: '30+',
+    label: t(
+      '深度合作的香港及海外持牌银行与 MSO 机构',
+      'Licensed bank and MSO partners across Hong Kong and overseas',
+      '深度合作的香港及海外持牌銀行與 MSO 機構',
+    ),
   },
-)
+  {
+    value: '200+',
+    label: t(
+      '已建立专属资金通道的企业客户',
+      'Enterprise clients with dedicated payment corridors',
+      '已建立專屬資金通道的企業客戶',
+    ),
+  },
+  {
+    value: '0',
+    label: t(
+      '公开泄露的客户信息（严格保密协议全面执行）',
+      'Public client-data breaches (mutual NDAs enforced)',
+      '公開泄露的客戶信息（嚴格保密協議全面執行）',
+    ),
+  },
+  {
+    value: '60%',
+    label: t(
+      '平均为客户节省的对公开户与合规沟通时间',
+      'Average time saved on public onboarding and compliance coordination',
+      '平均為客戶節省的對公開戶與合規溝通時間',
+    ),
+  },
+])
+
 </script>
 
 <template>
 <div ref="root">
 <!-- ===== Hero ===== -->
 <section class="hero hero-home">
-<div class="container">
-<div class="hero-layout">
-<div class="hero-copy reveal-group">
-<h1 class="reveal" data-en='Licensed Cross-border Payment<br>Making Global Collections <span class="hero-accent">Easier</span> for Cross-border Businesses' data-zh='持牌跨境支付<br/>让跨境企业<span class="hero-accent">全球收款更简单</span>' data-tw='持牌跨境支付<br/>讓跨境企業<span class="hero-accent">全球收款更簡單</span>'>持牌跨境支付<br/>让跨境企业<span class="hero-accent">全球收款更简单</span></h1>
-<p class="lead reveal" data-en='ADG PAY holds a <mark class="hero-license-mark">Hong Kong Money Service Operator (MSO) licence</mark> and focuses on providing compliant, transparent and efficient cross-border collection and multi-currency settlement services for cross-border enterprises such as e-commerce, trade and SaaS. Local team, companion-style service.' data-zh='ADG PAY持有<mark class="hero-license-mark">香港MSO牌照</mark>，专注为电商、外贸与 SaaS 等跨境企业提供合规、透明、高效的跨境收款与多币种结算服务。本地团队，陪伴式服务。' data-tw='ADG PAY持有<mark class="hero-license-mark">香港MSO牌照</mark>，專注爲電商、外貿與 SaaS 等跨境企業提供合規、透明、高效的跨境收款與多幣種結算服務。本地團隊，陪伴式服務。'>ADG PAY持有<mark class="hero-license-mark">香港MSO牌照</mark>，专注为电商、外贸与 SaaS 等跨境企业提供合规、透明、高效的跨境收款与多币种结算服务。本地团队，陪伴式服务。</p>
-<div class="hero-cta reveal">
-<a class="btn btn-primary btn-lg" data-en="Account Opening Consult" data-zh="咨询开户" data-tw="諮詢開戶" href="/contact">咨询开户</a>
-<a class="btn btn-outline btn-lg" data-en="View Product Solutions" data-zh="查看产品方案" data-tw="查看產品方案" href="/products">查看产品方案</a>
-</div>
-</div>
-<div class="hero-media reveal">
-<HeroVisual />
-</div>
-</div>
-<div class="hero-stats reveal-group">
-<div class="stat reveal"><div class="num" data-en="Multi-currency Accounts" data-zh="多币种账户" data-tw="多幣種賬戶">多币种账户</div><div class="label" data-en="Local-currency Collection &amp; Settlement" data-zh="本地币种收款与结算" data-tw="本地幣種收款與結算">本地币种收款与结算</div></div>
-<div class="stat reveal"><div class="num" data-en="Transparent Fees" data-zh="费率透明" data-tw="費率透明">费率透明</div><div class="label" data-en="No Hidden Fees" data-zh="无隐藏费用" data-tw="無隱藏費用">无隐藏费用</div></div>
-<div class="stat reveal"><div class="num" data-en="Licensed &amp; Compliant" data-zh="持牌合规" data-tw="持牌合規">持牌合规</div><div class="label" data-en="Regulated Fund Services" data-zh="受监管资金服务" data-tw="受監管資金服務">受监管资金服务</div></div>
-<div class="stat reveal"><div class="num" data-en="Localized Support" data-zh="本地化支持" data-tw="本地化支持">本地化支持</div><div class="label" data-en="Chinese-speaking Team Service" data-zh="中文团队服务" data-tw="中文團隊服務">中文团队服务</div></div>
-</div>
-</div>
+  <div class="container hero-home-grid">
+    <div class="hero-home-copy reveal-group">
+      <h1 class="hero-home-title reveal">
+        <span class="hero-home-brand">ADG PAY</span>
+        <span class="hero-home-lead">{{
+          t(
+            '一个专为跨境企业打造的资金通道平台',
+            'Cross-border payments infrastructure built for global enterprises',
+            '一個專為跨境企業打造的資金通道平台',
+          )
+        }}</span>
+      </h1>
+      <p class="hero-home-desc reveal">{{
+        t(
+          '我们不做“超市型”金融服务，而做“私人银行”级别的稀缺渠道整合者——以深度掌控的顶级牌照网络，为您的每一笔跨境资金，提供精准的专属通路。',
+          'We don’t run a one-size-fits-all financial supermarket. We curate scarce, high-quality licensed corridors—so every transfer has a precise, dedicated path.',
+          '我們不做「超市型」金融服務，而做「私人銀行」級別的稀缺渠道整合者——以深度掌控的頂級牌照網絡，為您的每一筆跨境資金，提供精準的專屬通路。',
+        )
+      }}</p>
+      <div class="hero-cta hero-home-cta reveal">
+        <RouterLink class="btn btn-primary btn-lg" to="/contact">{{
+          t('咨询开户', 'Get started', '諮詢開戶')
+        }}</RouterLink>
+        <RouterLink class="btn btn-outline btn-lg" to="/products">{{
+          t('产品与解决方案', 'Products & Solutions', '產品與解決方案')
+        }}</RouterLink>
+      </div>
+    </div>
+    <div class="hero-home-visual reveal">
+      <HeroVisual />
+    </div>
+  </div>
 </section>
-<!-- ===== 全球覆盖 · 国旗流动 ===== -->
+<!-- ===== 覆盖地区 · 国旗流动 ===== -->
 <FlagMarquee />
 <!-- ===== 核心产品 ===== -->
 <section class="section products-section">
-<div class="container">
-<div class="products-split reveal-group">
-<div class="products-copy reveal">
-<span class="products-kicker" data-en="Core Products" data-zh="核心产品" data-tw="核心產品">核心产品</span>
-<h2 data-en="One-stop Cross-border Pay-in &amp; Pay-out" data-zh="一站式的跨境收付能力" data-tw="一站式的跨境收付能力">一站式的跨境收付能力</h2>
-<p class="products-lead" data-en="Built around real cross-border trade scenarios — practical, easy to use, and free of unnecessary complexity." data-zh="围绕跨境企业真实贸易场景打造，功能务实、上手简单，不堆砌复杂概念。" data-tw="圍繞跨境企業真實貿易場景打造，功能務實、上手簡單，不堆砌複雜概念。">围绕跨境企业真实贸易场景打造，功能务实、上手简单，不堆砌复杂概念。</p>
+  <div class="container">
+    <div class="products-showcase reveal-group">
+      <header class="products-showcase-head reveal">
+        <p
+          class="products-showcase-kicker"
+          data-en="Why choose ADG PAY?"
+          data-zh="为什么选择 ADG PAY？"
+          data-tw="為什麼選擇 ADG PAY？"
+        >为什么选择 ADG PAY？</p>
+        <h2
+          data-en="Powerful solutions built for global enterprises"
+          data-zh="为全球化企业打造功能强大的解决方案"
+          data-tw="為全球化企業打造功能強大的解決方案"
+        >为全球化企业打造功能强大的解决方案</h2>
+        <p
+          class="products-showcase-lead"
+          data-en="From corridor matching and global collection to international payouts, FX and dedicated advisory—an end-to-end payments stack for cross-border funds."
+          data-zh="从渠道匹配、全球收款到国际付款、灵活换汇与专属咨询，一站式覆盖跨境资金全链路。"
+          data-tw="從渠道匹配、全球收款到國際付款、靈活換匯與專屬諮詢，一站式覆蓋跨境資金全鏈路。"
+        >从渠道匹配、全球收款到国际付款、灵活换汇与专属咨询，一站式覆盖跨境资金全链路。</p>
+      </header>
 
-<div class="products-tabs" role="tablist" aria-label="产品分类">
-<button
-  type="button"
-  role="tab"
-  class="products-tab"
-  :class="{ active: productTab === 'methods' }"
-  :aria-selected="productTab === 'methods'"
-  @click="setTab('methods')"
->
-  <span data-en="Pay-in &amp; Pay-out" data-zh="收付方式" data-tw="收付方式">收付方式</span>
-</button>
-<button
-  type="button"
-  role="tab"
-  class="products-tab"
-  :class="{ active: productTab === 'scenarios' }"
-  :aria-selected="productTab === 'scenarios'"
-  @click="setTab('scenarios')"
->
-  <span data-en="Scenarios" data-zh="适配场景" data-tw="適配場景">适配场景</span>
-</button>
-</div>
+      <div class="products-feature-grid">
+        <RouterLink
+          v-for="card in productCards"
+          :key="card.key"
+          class="products-feature-card reveal"
+          :class="`products-feature-card--${card.theme}`"
+          :to="card.to"
+        >
+          <div class="products-feature-card__top">
+            <h3 class="products-feature-card__title">{{ card.title }}</h3>
+            <p class="products-feature-card__desc">{{ card.desc }}</p>
+            <span class="products-feature-card__cta">
+              <template v-if="card.showCtaText">{{ t('了解更多', 'Learn more', '了解更多') }}</template>
+              <span aria-hidden="true">→</span>
+            </span>
+          </div>
 
-<div class="products-acc">
-<div
-  v-for="(item, index) in products"
-  :key="productTab + '-' + item.key"
-  class="products-acc-item"
-  :class="{ open: openProduct === index }"
->
-<button
-  class="products-acc-trigger"
-  type="button"
-  :aria-expanded="openProduct === index"
-  @click="selectProduct(index)"
->
-<span>{{ item.title }}</span>
-<span class="products-acc-icon" aria-hidden="true">{{ openProduct === index ? '−' : '+' }}</span>
-</button>
-<div class="products-acc-body">
-<div class="products-acc-panel">
-<p v-if="item.subtitle" class="products-acc-sub">{{ item.subtitle }}</p>
-<p>{{ item.desc }}</p>
-<ul v-if="item.features?.length" class="products-acc-features">
-<li v-for="(f, fi) in item.features" :key="fi">{{ f }}</li>
-</ul>
-</div>
-</div>
-</div>
-</div>
+          <!-- 全球收款：账户看板 + 手机 -->
+          <div v-if="card.key === 'collect'" class="products-feature-card__visual" aria-hidden="true">
+            <div class="pf-mock pf-mock--panel">
+              <div class="pf-mock__head">
+                <span class="pf-dot"></span><span class="pf-dot"></span><span class="pf-dot"></span>
+              </div>
+              <div class="pf-mock__kpi">
+                <span></span><span></span><span></span>
+              </div>
+              <div class="pf-mock__bars">
+                <i style="--h:58%"></i><i style="--h:78%"></i><i style="--h:46%"></i><i style="--h:88%"></i><i style="--h:64%"></i>
+              </div>
+            </div>
+            <div class="pf-mock pf-mock--phone">
+              <span class="pf-mock__notch"></span>
+              <span class="pf-mock__pill"></span>
+              <span class="pf-mock__line"></span>
+              <span class="pf-mock__line pf-mock__line--sm"></span>
+            </div>
+          </div>
 
-<a class="btn btn-primary products-cta" :href="ctaHref">
-<span data-en="Learn more →" data-zh="了解更多 →" data-tw="了解更多 →">了解更多 →</span>
-</a>
-</div>
+          <!-- 国际付款：付款列表 -->
+          <div v-else-if="card.key === 'pay'" class="products-feature-card__visual" aria-hidden="true">
+            <div class="pf-mock pf-mock--list">
+              <div class="pf-mock__head">
+                <span class="pf-dot"></span><span class="pf-dot"></span><span class="pf-dot"></span>
+              </div>
+              <div class="pf-list-row" v-for="n in 4" :key="'pay-row-' + n">
+                <span class="pf-avatar"></span>
+                <span class="pf-lines"><i></i><i></i></span>
+                <span class="pf-amount"></span>
+              </div>
+            </div>
+            <div class="pf-mock pf-mock--phone pf-mock--phone-right">
+              <span class="pf-mock__notch"></span>
+              <span class="pf-mock__pill"></span>
+              <span class="pf-mock__line"></span>
+            </div>
+          </div>
 
-<div class="products-media reveal">
-<figure class="products-media-card">
-<img
-  class="products-media-img"
-  src="/images/products-core.jpg"
-  alt=""
-  width="1280"
-  height="853"
-  loading="lazy"
-  decoding="async"
-/>
-</figure>
-</div>
-</div>
-</div>
+          <!-- 灵活换汇：汇率卡片 -->
+          <div v-else-if="card.key === 'fx'" class="products-feature-card__visual" aria-hidden="true">
+            <div class="pf-mock pf-mock--fx">
+              <div class="pf-fx-card">
+                <span class="pf-fx-pair"></span>
+                <span class="pf-fx-rate"></span>
+                <span class="pf-fx-spark"></span>
+              </div>
+              <div class="pf-fx-card pf-fx-card--alt">
+                <span class="pf-fx-pair"></span>
+                <span class="pf-fx-rate"></span>
+                <span class="pf-fx-spark"></span>
+              </div>
+            </div>
+          </div>
+
+          <!-- 渠道匹配：表单/通道 -->
+          <div v-else-if="card.key === 'match'" class="products-feature-card__visual" aria-hidden="true">
+            <div class="pf-mock pf-mock--form">
+              <span class="pf-form-label"></span>
+              <span class="pf-form-field"></span>
+              <span class="pf-form-label"></span>
+              <span class="pf-form-field"></span>
+              <span class="pf-form-btn"></span>
+              <div class="pf-channel-tags">
+                <i></i><i></i><i></i>
+              </div>
+            </div>
+          </div>
+
+          <!-- 专属咨询：对话/顾问 -->
+          <div v-else class="products-feature-card__visual" aria-hidden="true">
+            <div class="pf-mock pf-mock--chat">
+              <div class="pf-chat-bubble pf-chat-bubble--in"></div>
+              <div class="pf-chat-bubble pf-chat-bubble--out"></div>
+              <div class="pf-chat-bubble pf-chat-bubble--in pf-chat-bubble--short"></div>
+            </div>
+            <div class="pf-mock pf-mock--phone pf-mock--phone-right">
+              <span class="pf-mock__notch"></span>
+              <span class="pf-mock__pill"></span>
+              <span class="pf-mock__line"></span>
+              <span class="pf-mock__line pf-mock__line--sm"></span>
+            </div>
+          </div>
+        </RouterLink>
+      </div>
+    </div>
+  </div>
 </section>
-<!-- ===== 为什么选择我们 ===== -->
-<section class="section why-section">
-<div class="container">
-<div class="why-layout">
-<div class="why-main reveal-group">
-<div class="why-copy reveal">
-<span class="why-kicker" data-en="Why Choose ADG PAY" data-zh="为什么选择 ADG PAY" data-tw="爲什麼選擇 ADG PAY">为什么选择 ADG PAY</span>
-<h2 data-en="Focused on Cross-border Enterprises, We Understand Your Business" data-zh="专注跨境企业，更懂你的业务" data-tw="專注跨境企業，更懂你的業務">专注跨境企业，更懂你的业务</h2>
-<p data-en="We turn compliance, transparency and localized service into cross-border pay-in/pay-out capabilities that cross-border enterprises can afford." data-zh="我们把合规、透明与本地化服务，做成跨境企业用得起的跨境收付能力。" data-tw="我們把合規、透明與本地化服務，做成跨境企業用得起的跨境收付能力。">我们把合规、透明与本地化服务，做成跨境企业用得起的跨境收付能力。</p>
-
-<div class="why-license">
-<strong class="why-license-title" data-en="Regulated Fund Services" data-zh="受监管的资金服务" data-tw="受監管的資金服務">受监管的资金服务</strong>
-<p data-en="We hold a Money Service Operator licence issued by Hong Kong Customs (MSO), regulated for anti-money laundering and customer due diligence, providing institutional safeguards for client fund security." data-zh="我们持有香港海关发出的MSO牌照，在反洗黑钱与客户尽职审查方面受监管约束，为客户资金安全提供制度性保障。" data-tw="我們持有香港海關發出的MSO牌照，在反洗黑錢與客戶盡職審查方面受監管約束，爲客戶資金安全提供制度性保障。">我们持有香港海关发出的MSO牌照，在反洗黑钱与客户尽职审查方面受监管约束，为客户资金安全提供制度性保障。</p>
-
-<div class="why-license-kv">
-<div class="why-kv">
-<span class="k" data-en="Regulatory Authority" data-zh="监管机构" data-tw="監管機構">监管机构</span>
-<span class="v" data-en="Customs &amp; Excise Department" data-zh="香港海关" data-tw="香港海關">香港海关（Customs &amp; Excise Department）</span>
-</div>
-<div class="why-kv">
-<span class="k" data-en="Scope of Services" data-zh="服务范围" data-tw="服務範圍">服务范围</span>
-<span class="v" data-en="Currency Exchange / Remittance" data-zh="货币兑换 / 汇款" data-tw="貨幣兌換 / 匯款">货币兑换 / 汇款</span>
-</div>
-<div class="why-kv">
-<span class="k" data-en="Fund Arrangement" data-zh="资金安排" data-tw="資金安排">资金安排</span>
-<span class="v" data-en="Client Funds Segregated Custody" data-zh="客户资金隔离存放" data-tw="客戶資金隔離存放">客户资金隔离存放</span>
-</div>
-</div>
-<a class="btn btn-primary btn-sm why-license-cta" data-en="View Licence Details" data-zh="查看资质详情" data-tw="查看資質詳情" href="/about#license">查看资质详情</a>
-</div>
-</div>
-<div class="why-globe-wrap reveal">
-<WhyGlobe />
-</div>
-</div>
-<div class="why-metrics reveal-group">
-<div class="why-metric reveal why-metric--a">
-<strong data-en="Licensed &amp; Compliant" data-zh="持牌合规" data-tw="持牌合規">持牌合规</strong>
-<span data-en="The Hong Kong MSO licence is supervised by Customs; regulated operations make funds more trustworthy." data-zh="香港 MSO 牌照受海关监管，经营受约束、资金更可信。" data-tw="香港 MSO 牌照受海關監管，經營受約束、資金更可信。">香港 MSO 牌照受海关监管，经营受约束、资金更可信。</span>
-</div>
-<div class="why-metric reveal why-metric--b">
-<strong data-en="Transparent Fees" data-zh="费率透明" data-tw="費率透明">费率透明</strong>
-<span data-en="No hidden fees — rates and FX are clearly disclosed before account opening." data-zh="无隐藏费用，费率与汇率在开户前清晰告知。" data-tw="無隱藏費用，費率與匯率在開戶前清晰告知。">无隐藏费用，费率与汇率在开户前清晰告知。</span>
-</div>
-<div class="why-metric reveal why-metric--c">
-<strong data-en="Local Service" data-zh="本地服务" data-tw="本地服務">本地服务</strong>
-<span data-en="Chinese / English support team following a unified process for clear, barrier-free communication." data-zh="中文 / English 支持团队，按统一流程跟进，沟通清晰无隔阂。" data-tw="中文 / English 支持團隊，按統一流程跟進，溝通清晰無隔閡。">中文 / English 支持团队，按统一流程跟进，沟通清晰无隔阂。</span>
-</div>
-<div class="why-metric reveal why-metric--d">
-<strong data-en="Fast Response" data-zh="快速响应" data-tw="快速響應">快速响应</strong>
-<span data-en="Short decision chains mean faster responses for onboarding and issue resolution." data-zh="决策链路短，开户与问题处理响应更快。" data-tw="決策鏈路短，開戶與問題處理響應更快。">决策链路短，开户与问题处理响应更快。</span>
-</div>
-</div>
-</div>
-</div>
+<!-- ===== 专属方案：圆形主视觉 + 编号文案列表 ===== -->
+<section class="section compare-section">
+  <div class="container">
+    <div class="compare-grid reveal-group">
+      <div class="compare-visual reveal" aria-hidden="true">
+        <img :src="compareImageSrc" alt="" loading="lazy" decoding="async" />
+      </div>
+      <div class="compare-list-wrap">
+        <span
+          class="why-panel-kicker compare-kicker reveal"
+          data-en="Products &amp; Solutions"
+          data-zh="产品与解决方案"
+          data-tw="產品與解決方案"
+        >产品与解决方案</span>
+        <ol class="compare-list" role="list">
+          <li
+            v-for="item in compareItems"
+            :key="item.num"
+            class="compare-item reveal"
+            :data-open="openCompareNum === item.num ? 'true' : undefined"
+          >
+            <button
+              type="button"
+              class="compare-item__trigger"
+              :aria-expanded="openCompareNum === item.num"
+              :aria-controls="`compare-solution-${item.num}`"
+              @click="toggleCompare(item.num)"
+            >
+              <span class="compare-item__num">{{ item.num }}</span>
+              <div class="compare-item__main">
+                <h3 class="compare-item__title">
+                  <span class="compare-item__title-primary">{{ item.primary }}</span>
+                  <template v-if="item.secondary">
+                    <span class="compare-item__title-sep"> / </span>
+                    <span class="compare-item__title-secondary">{{ item.secondary }}</span>
+                  </template>
+                </h3>
+                <p class="compare-item__text">{{ item.text }}</p>
+              </div>
+              <span
+                class="compare-item__hint"
+                aria-hidden="true"
+                :title="openCompareNum === item.num
+                  ? t('收起方案', 'Collapse', '收起方案')
+                  : t('展开方案', 'Expand', '展開方案')"
+              ></span>
+            </button>
+            <div
+              :id="`compare-solution-${item.num}`"
+              class="compare-item__solution"
+              :aria-hidden="openCompareNum !== item.num"
+            >
+              <div class="compare-item__solution-inner">
+                <h4 class="compare-item__solution-title">
+                  <span class="compare-item__title-primary">{{ item.solutionPrimary }}</span>
+                  <template v-if="item.solutionSecondary">
+                    <span class="compare-item__title-sep"> / </span>
+                    <span class="compare-item__title-secondary">{{ item.solutionSecondary }}</span>
+                  </template>
+                </h4>
+                <p class="compare-item__solution-text">{{ item.solutionText }}</p>
+              </div>
+            </div>
+          </li>
+        </ol>
+        <a class="why-panel-link compare-more" href="/contact">
+          <span data-en="Learn More >" data-zh="了解更多 >" data-tw="了解更多 >">了解更多 ></span>
+        </a>
+      </div>
+    </div>
+  </div>
 </section>
-<!-- ===== 如何开始 + CTA ===== -->
+<!-- ===== 关于我们 + 全球专属资金通道 ===== -->
 <section class="section start-section">
-<div class="container">
-<div class="start-head reveal">
-<span class="products-kicker" data-en="Get Started in Four Steps" data-zh="四步开始" data-tw="四步開始">四步开始</span>
-<h2 data-en="A Simple Onboarding &amp; Usage Flow" data-zh="开户与使用的简单流程" data-tw="開戶與使用的簡單流程">开户与使用的简单流程</h2>
-<p data-en="Submit online, documents reviewed, and you can start collecting in as few as a few business days." data-zh="线上提交，资料审核，最快数个工作日内即可开始收款。" data-tw="線上提交，資料審核，最快數個工作日內即可開始收款。">线上提交，资料审核，最快数个工作日内即可开始收款。</p>
-</div>
-<div class="start-steps reveal-group" role="list">
-<div class="start-step reveal" role="listitem">
-<div class="start-step-inner">
-<span class="start-step-n">1</span>
-<div class="start-step-copy">
-<h4 data-en="Submit Application" data-zh="提交申请" data-tw="提交申請">提交申请</h4>
-<p data-en="Fill in company details online and select target currencies and services." data-zh="在线填写企业资料，选择目标币种与服务。" data-tw="在線填寫企業資料，選擇目標幣種與服務。">在线填写企业资料，选择目标币种与服务。</p>
-</div>
-</div>
-</div>
-<div class="start-step reveal" role="listitem">
-<div class="start-step-inner">
-<span class="start-step-n">2</span>
-<div class="start-step-copy">
-<h4 data-en="Verification" data-zh="资质审核" data-tw="資質審核">资质审核</h4>
-<p data-en="Complete KYC and business due diligence; complete documents speed up review." data-zh="完成 KYC 与业务尽调，资料齐全审核更快。" data-tw="完成 KYC 與業務盡調，資料齊全審核更快。">完成 KYC 与业务尽调，资料齐全审核更快。</p>
-</div>
-</div>
-</div>
-<div class="start-step reveal" role="listitem">
-<div class="start-step-inner">
-<span class="start-step-n">3</span>
-<div class="start-step-copy">
-<h4 data-en="Account Opening" data-zh="开通账户" data-tw="開通賬戶">开通账户</h4>
-<p data-en="Get multi-currency virtual accounts and immediately provide collection details to clients." data-zh="获取多币种虚拟账户，可立即向客户提供收款信息。" data-tw="獲取多幣種虛擬賬戶，可立即向客戶提供收款信息。">获取多币种虚拟账户，可立即向客户提供收款信息。</p>
-</div>
-</div>
-</div>
-<div class="start-step reveal" role="listitem">
-<div class="start-step-inner">
-<span class="start-step-n">4</span>
-<div class="start-step-copy">
-<h4 data-en="Collection &amp; Settlement" data-zh="收款结算" data-tw="收款結算">收款结算</h4>
-<p data-en="Collect, hold or settle, with a dedicated manager assisting throughout." data-zh="收款、持有或结算，专属经理全程协助。" data-tw="收款、持有或結算，專屬經理全程協助。">收款、持有或结算，专属经理全程协助。</p>
-</div>
-</div>
-</div>
-</div>
-
-<div class="start-cta reveal">
-<div class="start-cta-copy">
-<h2 data-en="Ready to Make Cross-border Collection Easier?" data-zh="准备好让跨境收款更省心了吗？" data-tw="準備好讓跨境收款更省心了嗎？">准备好让跨境收款更省心了吗？</h2>
-<p data-en="Talk to our local team to get a compliant payment solution tailored to your business." data-zh="与我们的本地团队聊聊，获取适合你业务的合规支付方案。" data-tw="與我們的本地團隊聊聊，獲取適合你業務的合規支付方案。">与我们的本地团队聊聊，获取适合你业务的合规支付方案。</p>
-</div>
-<div class="start-cta-actions">
-<a class="btn btn-primary btn-lg" data-en="Free Consultation" data-zh="免费咨询" data-tw="免費諮詢" href="/contact">免费咨询</a>
-<a class="btn btn-outline btn-lg" data-en="FAQ" data-zh="常见问题" data-tw="常見問題" href="/faq">常见问题</a>
-</div>
-</div>
-</div>
+  <div class="container start-channel reveal-group">
+    <div class="start-channel-main">
+      <div class="start-channel-media" aria-hidden="true">
+        <WhyGlobe id-prefix="start" />
+      </div>
+      <div class="start-channel-copy reveal">
+        <span
+          class="why-panel-kicker"
+          data-en="About Us"
+          data-zh="关于我们"
+          data-tw="關於我們"
+        >关于我们</span>
+        <h2
+          data-en="Built for cross-border enterprises—we understand your business"
+          data-zh="专注跨境企业，更懂你的业务"
+          data-tw="專注跨境企業，更懂你的業務"
+        >专注跨境企业，更懂你的业务</h2>
+        <p
+          data-en="ADG PAY holds payment licences across multiple regions and serves cross-border groups, e-commerce, trade exporters and SaaS companies with global collection, international and local payouts, and multi-currency FX and settlement."
+          data-zh="ADG PAY 持有多地支付牌照，面向跨境集团、跨境电商、外贸出口与 SaaS 等企业，提供全球收款、国际和本土付款以及多币种换汇与结算等服务。"
+          data-tw="ADG PAY 持有多地支付牌照，面向跨境集團、跨境電商、外貿出口與 SaaS 等企業，提供全球收款、國際和本土付款以及多幣種換匯與結算等服務。"
+        >ADG PAY 持有多地支付牌照，面向跨境集团、跨境电商、外贸出口与 SaaS 等企业，提供全球收款、国际和本土付款以及多币种换汇与结算等服务。</p>
+        <a class="why-panel-link" href="/about">
+          <span data-en="Learn More >" data-zh="了解更多 >" data-tw="了解更多 >">了解更多 ></span>
+        </a>
+      </div>
+    </div>
+    <div class="start-stats reveal" role="list">
+      <div
+        v-for="stat in channelStats"
+        :key="stat.value + stat.label"
+        class="start-stat"
+        role="listitem"
+      >
+        <div class="start-stat-value">{{ stat.value }}</div>
+        <div class="start-stat-label">{{ stat.label }}</div>
+      </div>
+    </div>
+  </div>
 </section>
 </div>
 </template>

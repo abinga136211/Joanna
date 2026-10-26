@@ -1,26 +1,66 @@
 <script setup>
-import { ref } from 'vue'
+import { computed, ref, watch } from 'vue'
 import { apiFetch } from '@/api/client'
 import { formatDateTime, previewText } from '@/utils/formatAdmin'
 import { useAutoRefresh } from '@/composables/useAutoRefresh'
 
 const items = ref([])
-const filter = ref('all')
-const includeDeleted = ref(false)
+const searchInput = ref('')
+const searchQuery = ref('')
+const statusFilter = ref('all')
 const msg = ref('')
 const industryLabel = {
-  ecommerce: '跨境电商',
-  trade: '外贸出口',
-  saas: '软件服务',
+  goods: '货物贸易',
+  services: '服务贸易',
+  fx: '灵活换汇',
+  // 兼容旧数据
+  b2b: '外贸 B2B 供应链企业',
+  digital: '服务贸易与数字企业',
+  family: '投资控股与家族办公室',
+  ecommerce: '外贸 B2B 供应链企业',
+  trade: '外贸 B2B 供应链企业',
+  saas: '服务贸易与数字企业',
   other: '其他',
 }
+
+const filteredItems = computed(() => {
+  let list = items.value
+  if (statusFilter.value === 'deleted') {
+    list = list.filter((r) => r.is_deleted)
+  } else if (statusFilter.value !== 'all_deleted') {
+    list = list.filter((r) => !r.is_deleted)
+    if (statusFilter.value === 'unread') list = list.filter((r) => !r.is_read)
+    if (statusFilter.value === 'read') list = list.filter((r) => r.is_read)
+  }
+  const q = searchQuery.value.trim().toLowerCase()
+  if (!q) return list
+  return list.filter((row) => {
+    const industry = industryLabel[row.industry] || row.industry || ''
+    const hay = [
+      row.id,
+      row.name,
+      row.company,
+      row.phone,
+      row.email,
+      industry,
+      row.appointment_at,
+      row.message,
+      row.ip,
+    ]
+      .map((v) => String(v ?? '').toLowerCase())
+      .join(' ')
+    return hay.includes(q)
+  })
+})
 
 async function load() {
   try {
     const params = new URLSearchParams()
-    if (filter.value === 'unread') params.set('read', '0')
-    if (filter.value === 'read') params.set('read', '1')
-    if (includeDeleted.value) params.set('include_deleted', '1')
+    if (statusFilter.value === 'deleted' || statusFilter.value === 'all_deleted') {
+      params.set('include_deleted', '1')
+    }
+    if (statusFilter.value === 'unread') params.set('read', '0')
+    if (statusFilter.value === 'read') params.set('read', '1')
     const q = params.toString() ? `?${params}` : ''
     const data = await apiFetch(`/api/admin/inquiries${q}`)
     items.value = data.items || []
@@ -29,11 +69,21 @@ async function load() {
   }
 }
 
+watch(statusFilter, () => {
+  load()
+})
+
 useAutoRefresh(load, { intervalMs: 2000 })
 
-async function setFilter(v) {
-  filter.value = v
-  await load()
+function applySearch() {
+  searchQuery.value = searchInput.value.trim()
+}
+
+function onSearchKeydown(e) {
+  if (e.key === 'Enter') {
+    e.preventDefault()
+    applySearch()
+  }
 }
 
 async function toggleRead(row) {
@@ -55,35 +105,24 @@ async function softDelete(row) {
   <div class="admin-card">
     <h1>咨询记录</h1>
     <div class="admin-toolbar">
-      <button
-        class="admin-btn"
-        :class="{ 'is-active': filter === 'all' }"
-        type="button"
-        @click="setFilter('all')"
-      >
-        全部
-      </button>
-      <button
-        class="admin-btn"
-        :class="{ 'is-active': filter === 'unread' }"
-        type="button"
-        @click="setFilter('unread')"
-      >
-        未读
-      </button>
-      <button
-        class="admin-btn"
-        :class="{ 'is-active': filter === 'read' }"
-        type="button"
-        @click="setFilter('read')"
-      >
-        已读
-      </button>
-      <label class="admin-check">
-        <input v-model="includeDeleted" type="checkbox" @change="load" />
-        含已删除
-      </label>
+      <input
+        v-model="searchInput"
+        class="admin-toolbar-input"
+        type="search"
+        placeholder="搜索姓名、公司、邮箱、需求…"
+        aria-label="搜索咨询"
+        @keydown="onSearchKeydown"
+      />
+      <button class="admin-btn" type="button" @click="applySearch">搜索</button>
+      <select v-model="statusFilter" class="admin-toolbar-select" aria-label="筛选状态">
+        <option value="all">全部</option>
+        <option value="unread">未读</option>
+        <option value="read">已读</option>
+        <option value="deleted">仅已删除</option>
+        <option value="all_deleted">全部（含已删除）</option>
+      </select>
       <span class="admin-spacer" />
+      <span class="admin-muted">共 {{ filteredItems.length }} 条</span>
       <button class="admin-btn" type="button" @click="load">刷新</button>
     </div>
     <p v-if="msg" class="admin-msg err">{{ msg }}</p>
@@ -96,6 +135,7 @@ async function softDelete(row) {
             <th>联系人</th>
             <th>联系方式</th>
             <th>行业</th>
+            <th>预约时间</th>
             <th>需求说明</th>
             <th>来源</th>
             <th>操作</th>
@@ -103,9 +143,13 @@ async function softDelete(row) {
         </thead>
         <tbody>
           <tr
-            v-for="row in items"
+            v-for="row in filteredItems"
             :key="row.id"
-            :class="{ 'is-deleted-row': row.is_deleted }"
+            :class="{
+              'is-deleted-row': row.is_deleted,
+              'is-read-row': !row.is_deleted && row.is_read,
+              'is-unread-row': !row.is_deleted && !row.is_read,
+            }"
           >
             <td class="admin-cell-nowrap">{{ row.id }}</td>
             <td>
@@ -113,7 +157,7 @@ async function softDelete(row) {
                 class="admin-badge"
                 :class="row.is_deleted ? 'deleted' : row.is_read ? 'read' : 'unread'"
               >
-                {{ row.is_deleted ? '已删' : row.is_read ? '已读' : '未读' }}
+                {{ row.is_deleted ? '已删' : row.is_read ? '已读' : '● 未读' }}
               </span>
             </td>
             <td>
@@ -131,6 +175,7 @@ async function softDelete(row) {
             <td class="admin-cell-nowrap">
               {{ industryLabel[row.industry] || row.industry || '—' }}
             </td>
+            <td class="admin-cell-nowrap">{{ row.appointment_at || '—' }}</td>
             <td>
               <div class="admin-cell-clamp" :title="row.message">{{ previewText(row.message, 80) }}</div>
             </td>
@@ -157,8 +202,10 @@ async function softDelete(row) {
               <span v-else class="admin-muted">已软删</span>
             </td>
           </tr>
-          <tr v-if="!items.length">
-            <td colspan="8" class="admin-muted">暂无记录</td>
+          <tr v-if="!filteredItems.length">
+            <td colspan="9" class="admin-muted">
+              {{ items.length ? '没有匹配的记录' : '暂无记录' }}
+            </td>
           </tr>
         </tbody>
       </table>

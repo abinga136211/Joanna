@@ -1,0 +1,147 @@
+/** Default help-center subcategories (nav / footer / FAQ page). */
+export const DEFAULT_FAQ_TOPICS = [
+  {
+    slug: 'guide',
+    title_zh: '全球账户使用指南',
+    title_en: 'Global Account Guide',
+    title_tw: '全球賬戶使用指南',
+    description_zh: '了解全球账户的开通、使用与日常管理。',
+    description_en: 'How to open, use and manage your global account.',
+    description_tw: '了解全球賬戶的開通、使用與日常管理。',
+    sort_order: 1,
+  },
+  {
+    slug: 'faq',
+    title_zh: '常见问题',
+    title_en: 'FAQ',
+    title_tw: '常見問題',
+    description_zh: '开户、费率、操作与合规等问题一站查阅。',
+    description_en: 'Answers on onboarding, fees, operations and compliance.',
+    description_tw: '開戶、費率、操作與合規等問題一站查閱。',
+    sort_order: 2,
+  },
+  {
+    slug: 'docs',
+    title_zh: '产品技术文档',
+    title_en: 'Product & Technical Docs',
+    title_tw: '產品技術文檔',
+    description_zh: '接口说明与对接指引。',
+    description_en: 'API references and integration guides.',
+    description_tw: '接口說明與對接指引。',
+    sort_order: 3,
+  },
+  {
+    slug: 'privacy-policy',
+    title_zh: '隐私政策',
+    title_en: 'Privacy Policy',
+    title_tw: '隱私政策',
+    description_zh: '了解我们如何保护数据与处理隐私。',
+    description_en: 'How we protect data and handle privacy.',
+    description_tw: '了解我們如何保護數據與處理隱私。',
+    sort_order: 4,
+  },
+]
+
+/** Default articles keyed by topic slug (seeded once when faq_articles is empty). */
+export const DEFAULT_FAQ_ARTICLES_BY_SLUG = {
+  guide: [
+    {
+      title_zh: '如何开通全球账户？',
+      title_tw: '如何開通全球賬戶？',
+      title_en: 'How do I open a global account?',
+      body_zh: '文章内容占位：开通流程、所需资料与审核说明将在此更新。',
+      body_tw: '文章內容佔位：開通流程、所需資料與審核說明將在此更新。',
+      body_en:
+        'Placeholder: onboarding steps, required documents and review notes will be published here.',
+      sort_order: 1,
+    },
+    {
+      title_zh: '全球账户日常如何使用？',
+      title_tw: '全球賬戶日常如何使用？',
+      title_en: 'How do I use a global account day to day?',
+      body_zh: '文章内容占位：收款、付款、换汇与账户管理操作指引将在此更新。',
+      body_tw: '文章內容佔位：收款、付款、換匯與賬戶管理操作指引將在此更新。',
+      body_en:
+        'Placeholder: collection, payout, FX and account-management guides will be published here.',
+      sort_order: 2,
+    },
+  ],
+  faq: [
+    {
+      title_zh: '开户与审核常见问题',
+      title_tw: '開戶與審核常見問題',
+      title_en: 'Onboarding and review FAQ',
+      body_zh: '文章内容占位：开户资料、审核时效与补充材料说明将在此更新。',
+      body_tw: '文章內容佔位：開戶資料、審核時效與補充材料說明將在此更新。',
+      body_en:
+        'Placeholder: document lists, review timelines and supplemental-material notes will be published here.',
+      sort_order: 1,
+    },
+    {
+      title_zh: '费率、结算与到账时效',
+      title_tw: '費率、結算與到賬時效',
+      title_en: 'Fees, settlement and arrival times',
+      body_zh: '文章内容占位：费率构成、可结算币种与到账时效说明将在此更新。',
+      body_tw: '文章內容佔位：費率構成、可結算幣種與到賬時效說明將在此更新。',
+      body_en:
+        'Placeholder: fee structure, settlement currencies and arrival timing will be published here.',
+      sort_order: 2,
+    },
+    {
+      title_zh: '账户操作与客服支持',
+      title_tw: '賬戶操作與客服支持',
+      title_en: 'Account operations and support',
+      body_zh: '文章内容占位：账户查询、凭证核对与多语言支持说明将在此更新。',
+      body_tw: '文章內容佔位：賬戶查詢、憑證核對與多語言支持說明將在此更新。',
+      body_en:
+        'Placeholder: account lookup, voucher reconciliation and multilingual support notes will be published here.',
+      sort_order: 3,
+    },
+  ],
+  docs: [
+    {
+      title_zh: '接口说明与对接指引',
+      title_tw: '接口說明與對接指引',
+      title_en: 'API reference and integration guide',
+      body_zh:
+        '文章内容占位：API 文档与对接示例将在此陆续发布。如需提前获取，请联系客户经理或支持团队。',
+      body_tw:
+        '文章內容佔位：API 文檔與對接示例將在此陸續發佈。如需提前獲取，請聯繫客戶經理或支持團隊。',
+      body_en:
+        'Placeholder: API docs and integration samples will be published here. For early access, contact your account manager or support.',
+      sort_order: 1,
+    },
+    {
+      title_zh: '产品能力与更新说明',
+      title_tw: '產品能力與更新說明',
+      title_en: 'Product capabilities and release notes',
+      body_zh: '文章内容占位：产品能力清单与版本更新说明将在此更新。',
+      body_tw: '文章內容佔位：產品能力清單與版本更新說明將在此更新。',
+      body_en: 'Placeholder: capability lists and release notes will be published here.',
+      sort_order: 2,
+    },
+  ],
+  'privacy-policy': [
+    {
+      title_zh: '我们如何处理与保护个人数据？',
+      title_tw: '我們如何處理與保護個人數據？',
+      title_en: 'How do we process and protect personal data?',
+      body_zh:
+        '文章内容占位：完整隐私政策正文将在此发布。亦可先参阅合规页「数据与隐私」说明。',
+      body_tw:
+        '文章內容佔位：完整隱私政策正文將在此發佈。亦可先參閱合規頁「數據與隱私」說明。',
+      body_en:
+        'Placeholder: the full privacy policy will be published here. You can also review Data & Privacy on the Compliance page.',
+      sort_order: 1,
+    },
+    {
+      title_zh: 'Cookie 与偏好设定',
+      title_tw: 'Cookie 與偏好設定',
+      title_en: 'Cookies and preference settings',
+      body_zh: '文章内容占位：Cookie 使用范围与偏好管理说明将在此更新。',
+      body_tw: '文章內容佔位：Cookie 使用範圍與偏好管理說明將在此更新。',
+      body_en: 'Placeholder: cookie scope and preference controls will be published here.',
+      sort_order: 2,
+    },
+  ],
+}

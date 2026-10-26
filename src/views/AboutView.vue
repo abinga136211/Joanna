@@ -4,10 +4,18 @@ import { useScrollReveal } from '@/composables/useScrollReveal'
 
 const root = ref(null)
 useScrollReveal(root)
+
+const assetBase = import.meta.env.BASE_URL
+const aboutHeroSrc = `${assetBase}images/about-hero.jpg?v=7`
+const aboutHeroWebp = `${assetBase}images/about-hero.webp?v=7`
+const aboutLicenseSrc = `${assetBase}images/about-license.jpg`
+const aboutLicenseWebp = `${assetBase}images/about-license.webp`
+const missionLogoSrc = `${assetBase}images/logo/adg-logo-transparent.png`
 </script>
 
 <template>
-<div ref="root">
+<!-- 关于页根节点：整页连续背景，柔化 Hero 光晕与区块硬切 -->
+<div ref="root" class="about-page">
 <section class="hero hero-about">
 <div class="hero-about-bg" aria-hidden="true">
 <span class="hero-about-orb hero-about-orb--tl"></span>
@@ -16,25 +24,23 @@ useScrollReveal(root)
 </div>
 <div class="container hero-about-inner">
 <div class="hero-about-copy reveal-group">
-<span class="hero-about-kicker reveal" data-en="Our Positioning" data-zh="我们的定位" data-tw="我們的定位">我们的定位</span>
-<h1 class="reveal" data-en="A Cross-border Payment Partner Born for Cross-border Enterprises" data-zh="为跨境企业而生的跨境支付伙伴" data-tw="爲跨境企業而生的跨境支付夥伴">为跨境企业而生的跨境支付伙伴</h1>
-<p class="lead reveal" data-en="ADG PAY holds a Hong Kong Money Service Operator (MSO) licence and serves cross-border enterprises such as e-commerce, trade export and SaaS with cross-border collection, multi-currency settlement and virtual accounts." data-zh="ADG PAY 持有香港MSO牌照，面向跨境电商、外贸出口与 SaaS 等跨境企业，提供跨境收款、多币种结算与虚拟账户等服务。" data-tw="ADG PAY 持有香港MSO牌照，面向跨境電商、外貿出口與 SaaS 等跨境企業，提供跨境收款、多幣種結算與虛擬賬戶等服務。">ADG PAY 持有香港MSO牌照，面向跨境电商、外贸出口与 SaaS 等跨境企业，提供跨境收款、多币种结算与虚拟账户等服务。</p>
-<p class="lead lead-secondary reveal" data-en="We believe compliant financial services should not be exclusive to large enterprises. So we combine licence advantages, transparent fees and localized service to make them accessible, affordable and trustworthy for cross-border enterprises." data-zh="我们相信，合规的金融服务不应只是大企业的专属。所以我们把牌照优势、透明费率与本地化服务结合起来，让跨境企业也能用得上、用得起、用得放心。" data-tw="我們相信，合規的金融服務不應只是大企業的專屬。所以我們把牌照優勢、透明費率與本地化服務結合起來，讓跨境企業也能用得上、用得起、用得放心。">我们相信，合规的金融服务不应只是大企业的专属。所以我们把牌照优势、透明费率与本地化服务结合起来，让跨境企业也能用得上、用得起、用得放心。</p>
+<h1 class="reveal" data-en="Built for cross-border enterprises—a partner that understands your business" data-zh="专注跨境企业，更懂你的业务伙伴" data-tw="專注跨境企業，更懂你的業務夥伴">专注跨境企业，更懂你的业务伙伴</h1>
+<p class="lead reveal" data-en="ADG PAY holds payment licences across multiple regions and serves cross-border groups, e-commerce, trade exporters and SaaS companies with global collection, international and local payouts, and multi-currency FX and settlement." data-zh="ADG PAY 持有多地支付牌照，面向跨境集团、跨境电商、外贸出口与 SaaS 等企业，提供全球收款、国际和本土付款以及多币种换汇与结算等服务。" data-tw="ADG PAY 持有多地支付牌照，面向跨境集團、跨境電商、外貿出口與 SaaS 等企業，提供全球收款、國際和本土付款以及多幣種換匯與結算等服務。">ADG PAY 持有多地支付牌照，面向跨境集团、跨境电商、外贸出口与 SaaS 等企业，提供全球收款、国际和本土付款以及多币种换汇与结算等服务。</p>
+<p class="lead lead-secondary reveal" data-en="Compliant financial services should not be reserved for large enterprises alone. We combine licensing strength, transparent pricing and localised support so cross-border SMEs can onboard efficiently, control costs and operate with confidence." data-zh="合规金融，不止服务大型企业。我们整合牌照优势、透明费率与本地化服务，助力跨境中小企业便捷启用、成本可控、安心托付。" data-tw="合規金融，不止服務大型企業。我們整合牌照優勢、透明費率與本地化服務，助力跨境中小企業便捷啓用、成本可控、安心託付。">合规金融，不止服务大型企业。我们整合牌照优势、透明费率与本地化服务，助力跨境中小企业便捷启用、成本可控、安心托付。</p>
 <ul class="hero-about-points reveal">
 <li>
 <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12l4 4 10-10"/></svg>
-<span data-en="Licensed operations, supervised by Hong Kong Customs" data-zh="持牌经营，受香港海关监管" data-tw="持牌經營，受香港海關監管">持牌经营，受香港海关监管</span>
+<span data-en="Licensed operations across Asia-Pacific, North America, Australia, Europe and South Africa" data-zh="亚太、北美、澳洲、欧洲以及南非等地持牌经营" data-tw="亞太、北美、澳洲、歐洲以及南非等地持牌經營">亚太、北美、澳洲、欧洲以及南非等地持牌经营</span>
 </li>
 <li>
 <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12l4 4 10-10"/></svg>
-<span data-en="Focused on real cross-border enterprise scenarios" data-zh="聚焦跨境企业真实场景" data-tw="聚焦跨境企業真實場景">聚焦跨境企业真实场景</span>
+<span data-en="Focused on real use cases in cross-border trade, e-commerce and SaaS" data-zh="聚焦跨境企业贸易、电商和SaaS服务等真实场景" data-tw="聚焦跨境企業貿易、電商和SaaS服務等真實場景">聚焦跨境企业贸易、电商和SaaS服务等真实场景</span>
 </li>
 <li>
 <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12l4 4 10-10"/></svg>
-<span data-en="Chinese-speaking team, same-time-zone service" data-zh="中文团队，时区一致的服务" data-tw="中文團隊，時區一致的服務">中文团队，时区一致的服务</span>
+<span data-en="Multilingual team with multi-timezone client support" data-zh="多语言团队，多时区客户服务支持" data-tw="多語言團隊，多時區客戶服務支持">多语言团队，多时区客户服务支持</span>
 </li>
 </ul>
-<a class="btn btn-primary btn-lg reveal" data-en="Talk to Us" data-zh="与我们聊聊" data-tw="與我們聊聊" href="/contact">与我们聊聊</a>
 </div>
 <div class="hero-about-media" aria-hidden="true">
 <svg class="hero-about-clip" width="0" height="0" aria-hidden="true">
@@ -45,100 +51,154 @@ useScrollReveal(root)
 </defs>
 </svg>
 <figure class="hero-about-figure">
-<img
-  class="hero-about-img"
-  src="/images/about-hero.jpg"
-  alt=""
-  width="1200"
-  height="900"
-  loading="eager"
-  decoding="async"
-/>
+<picture>
+  <source :srcset="aboutHeroWebp" type="image/webp" />
+  <img
+    class="hero-about-img"
+    :src="aboutHeroSrc"
+    alt=""
+    width="1200"
+    height="900"
+    loading="eager"
+    fetchpriority="high"
+    decoding="async"
+  />
+</picture>
 </figure>
 </div>
 </div>
 </section>
-<!-- ===== 里程碑 / 愿景足迹 ===== -->
-<section class="section journey-section">
-<div class="container">
-<div class="journey-vision">
-<p class="journey-eyebrow" data-en="Our Journey" data-zh="发展足迹" data-tw="發展足跡">发展足迹</p>
-<h2 data-en="We are not only building a cross-border payment solution — we are making licensed finance accessible for cross-border enterprises." data-zh="我们打造的不仅是一套跨境支付方案，而是让跨境企业用得上、用得起的合规金融能力" data-tw="我們打造的不僅是一套跨境支付方案，而是讓跨境企業用得上、用得起的合規金融能力">我们打造的不仅是一套跨境支付方案，而是让跨境企业用得上、用得起的合规金融能力</h2>
-</div>
-
-<div class="journey-gallery" aria-hidden="true">
-<figure class="journey-shot journey-shot--wide">
-<img src="/images/about-journey-1.jpg" alt="" width="1200" height="800" loading="lazy" decoding="async" />
-</figure>
-<figure class="journey-shot journey-shot--tall">
-<img src="/images/about-journey-2.jpg" alt="" width="720" height="960" loading="lazy" decoding="async" />
-</figure>
-</div>
-
-<ol class="journey-list reveal-group">
-<li class="journey-row reveal">
-<div class="journey-meta">
-<strong class="journey-mark" data-en="Start" data-zh="起步" data-tw="起步">起步</strong>
-<span class="journey-title" data-en="Company Founded" data-zh="公司成立" data-tw="公司成立">公司成立</span>
-</div>
-<p data-en="Established in Hong Kong, positioned for cross-border enterprise payment services." data-zh="于香港设立，定位跨境企业跨境支付服务。" data-tw="於香港設立，定位跨境企業跨境支付服務。">于香港设立，定位跨境企业跨境支付服务。</p>
-</li>
-<li class="journey-row reveal">
-<div class="journey-meta">
-<strong class="journey-mark" data-en="Licensed" data-zh="持牌" data-tw="持牌">持牌</strong>
-<span class="journey-title" data-en="Obtained MSO Licence" data-zh="取得 MSO牌照" data-tw="取得 MSO牌照">取得 MSO牌照</span>
-</div>
-<p data-en="Granted the Money Service Operator licence by Hong Kong Customs." data-zh="获香港海关发出MSO牌照。" data-tw="獲香港海關發出MSO牌照。">获香港海关发出MSO牌照。</p>
-</li>
-<li class="journey-row reveal">
-<div class="journey-meta">
-<strong class="journey-mark" data-en="Launch" data-zh="上线" data-tw="上線">上线</strong>
-<span class="journey-title" data-en="Products Launched" data-zh="产品上线" data-tw="產品上線">产品上线</span>
-</div>
-<p data-en="Cross-border collection and multi-currency settlement capabilities launched." data-zh="跨境收款与多币种结算能力对外提供服务。" data-tw="跨境收款與多幣種結算能力對外提供服務。">跨境收款与多币种结算能力对外提供服务。</p>
-</li>
-<li class="journey-row reveal">
-<div class="journey-meta">
-<strong class="journey-mark" data-en="Today" data-zh="今天" data-tw="今天">今天</strong>
-<span class="journey-title" data-en="Ongoing Service" data-zh="持续服务" data-tw="持續服務">持续服务</span>
-</div>
-<p data-en="Serving more industry clients and refining the localized experience." data-zh="服务更多行业客户，打磨本地化体验。" data-tw="服務更多行業客戶，打磨本地化體驗。">服务更多行业客户，打磨本地化体验。</p>
-</li>
-</ol>
-</div>
+<!-- ===== 使命 ===== -->
+<section class="section mission-section" id="mission">
+  <div class="mission-block reveal">
+    <div class="mission-block__stage" aria-hidden="true">
+      <span class="mission-block__wash"></span>
+    </div>
+    <div class="container mission-block__inner">
+      <div class="mission-block__copy">
+        <h2
+          class="mission-heading"
+          data-en="Mission"
+          data-zh="使命"
+          data-tw="使命"
+        >使命</h2>
+        <div class="mission-body">
+          <p
+            data-en="Deliver efficient, reliable global payment solutions for cross-border enterprises—and remove both visible and hidden barriers in fund flows."
+            data-zh="为跨境企业提供高效便捷的全球资金方案，打通资金流转的显性及隐性壁垒。"
+            data-tw="為跨境企業提供高效便捷的全球資金方案，打通資金流轉的顯性及隱性壁壘。"
+          >为跨境企业提供高效便捷的全球资金方案，打通资金流转的显性及隐性壁垒。</p>
+          <p
+            data-en="True convenience comes from deep mastery of top-tier corridors—and an uncompromising compliance and security baseline."
+            data-zh="真正的便捷，源自对顶级渠道的深度把控，坚守不容妥协的合规安全底线。"
+            data-tw="真正的便捷，源自對頂級渠道的深度把控，堅守不容妥協的合規安全底線。"
+          >真正的便捷，源自对顶级渠道的深度把控，坚守不容妥协的合规安全底线。</p>
+        </div>
+      </div>
+      <div class="mission-block__visual" aria-hidden="true">
+        <img
+          class="mission-block__mark"
+          :src="missionLogoSrc"
+          alt=""
+          width="720"
+          height="280"
+          loading="lazy"
+          decoding="async"
+        />
+      </div>
+    </div>
+  </div>
+</section>
+<!-- ===== 优势根源 ===== -->
+<section class="section advantage-section" id="advantage">
+  <div class="container">
+    <div class="advantage-block reveal">
+      <div class="advantage-intro">
+        <h2
+          class="advantage-heading"
+          data-en="Our Strengths"
+          data-zh="我们的优势"
+          data-tw="我們的優勢"
+        >我们的优势</h2>
+        <p
+          class="advantage-lead"
+data-en="With compliance as our foundation and expertise as our drive, we combine deep corridor control with dedicated relationship management to build steady, controllable cross-border payment rails for clients."
+            data-zh="我们以合规为基石、以专业为驱动，凭借对渠道的深度把控与管家式专属服务，持续为客户构筑稳健、可控的跨境资金通路。"
+            data-tw="我們以合規為基石、以專業為驅動，憑藉對渠道的深度把控與管家式專屬服務，持續為客戶構築穩健、可控的跨境資金通路。"
+          >我们以合规为基石、以专业为驱动，凭借对渠道的深度把控与管家式专属服务，持续为客户构筑稳健、可控的跨境资金通路。</p>
+      </div>
+      <div class="advantage-list" role="list">
+        <article class="advantage-item" role="listitem">
+          <h3
+            data-en="Global Cross-border Payment Network"
+            data-zh="全球化跨境支付网络"
+            data-tw="全球化跨境支付網絡"
+          >全球化跨境支付网络</h3>
+          <p
+            data-en="Our founding team brings senior experience from major banks and the payments industry, with multidisciplinary financial expertise. Together with influential ecosystem partners, we deliver integrated, high-value solutions and end-to-end service."
+            data-zh="核心创始团队拥有大型银行、支付行业资深从业背景，具备多元金融专业能力；携手一众拥有行业影响力的生态伙伴，为客户打造一体化、高价值的综合解决方案与全流程服务。"
+            data-tw="核心創始團隊擁有大型銀行、支付行業資深從業背景，具備多元金融專業能力；攜手一眾擁有行業影響力的生態夥伴，為客戶打造一體化、高價值的綜合解決方案與全流程服務。"
+          >核心创始团队拥有大型银行、支付行业资深从业背景，具备多元金融专业能力；携手一众拥有行业影响力的生态伙伴，为客户打造一体化、高价值的综合解决方案与全流程服务。</p>
+        </article>
+        <article class="advantage-item" role="listitem">
+          <h3
+            data-en="Professional Compliance Team"
+            data-zh="专业合规团队"
+            data-tw="專業合規團隊"
+          >专业合规团队</h3>
+          <p
+            data-en="We understand cross-border business scenarios in depth and uphold non-negotiable compliance standards. With safety and compliance at the core, we deliver robust end-to-end account management and payment experiences for enterprises of all sizes."
+            data-zh="团队深度洞悉跨境业务场景，始终恪守不容逾越的合规准则，以安全合规为核心，为大、中小型企业客户打造全链路稳健的账户管理与支付体验。"
+            data-tw="團隊深度洞悉跨境業務場景，始終恪守不容逾越的合規準則，以安全合規為核心，為大、中小型企業客戶打造全鏈路穩健的賬戶管理與支付體驗。"
+          >团队深度洞悉跨境业务场景，始终恪守不容逾越的合规准则，以安全合规为核心，为大、中小型企业客户打造全链路稳健的账户管理与支付体验。</p>
+        </article>
+        <article class="advantage-item" role="listitem">
+          <h3
+            data-en="Concierge-level Service Culture"
+            data-zh="管家式文化"
+            data-tw="管家式文化"
+          >管家式文化</h3>
+          <p
+            data-en="End-to-end dedicated service—each client is assigned a relationship manager, and business inquiries receive a prompt response within business days, without waiting in a general support queue."
+            data-zh="全流程专属管家服务——我们为每位客户配备专属客户经理，业务咨询将于工作日内获得快速响应，无需等候通用客服队列。"
+            data-tw="全流程專屬管家服務——我們為每位客戶配備專屬客戶經理，業務諮詢將於工作日內獲得快速響應，無需等候通用客服隊列。"
+          >全流程专属管家服务——我们为每位客户配备专属客户经理，业务咨询将于工作日内获得快速响应，无需等候通用客服队列。</p>
+        </article>
+      </div>
+    </div>
+  </div>
 </section>
 <!-- ===== 团队 ===== -->
-<section class="section team-section">
+<section class="section team-section" id="team">
 <div class="container">
 <div class="team-layout">
 <div class="team-copy">
-<span class="team-kicker" data-en="Core Team" data-zh="核心团队" data-tw="核心團隊">核心团队</span>
-<h2 data-en="A Pragmatic and Experienced Team" data-zh="务实而有经验的团队" data-tw="務實而有經驗的團隊">务实而有经验的团队</h2>
-<p data-en="Core members come from payments, risk control and cross-border trade, with first-hand understanding of cross-border enterprises' pain points." data-zh="核心成员来自支付、风控与跨境贸易领域，对跨境企业的经营痛点有切身体会。" data-tw="核心成員來自支付、風控與跨境貿易領域，對跨境企業的經營痛點有切身體會。">核心成员来自支付、风控与跨境贸易领域，对跨境企业的经营痛点有切身体会。</p>
+<h2 data-en="A pragmatic, experienced team" data-zh="务实而有经验的团队" data-tw="務實而有經驗的團隊">务实而有经验的团队</h2>
+<p data-en="Core members come from payments, risk and cross-border trade, with first-hand understanding of the challenges enterprises face." data-zh="核心成员来自支付、风控与跨境贸易领域，对跨境企业的经营痛点有切身体会。" data-tw="核心成員來自支付、風控與跨境貿易領域，對跨境企業的經營痛點有切身體會。">核心成员来自支付、风控与跨境贸易领域，对跨境企业的经营痛点有切身体会。</p>
 </div>
 <div class="team-grid reveal-group">
 <article class="team-item reveal">
 <div class="team-item-body">
 <h3 data-en="Management / Strategy" data-zh="管理 / 战略" data-tw="管理 / 戰略">管理 / 战略</h3>
-<p data-en="Responsible for compliance direction and overall operations, ensuring the business runs steadily within the regulatory framework." data-zh="负责合规方向与整体经营，确保业务在监管框架内稳健运行。" data-tw="負責合規方向與整體經營，確保業務在監管框架內穩健運行。">负责合规方向与整体经营，确保业务在监管框架内稳健运行。</p>
+<p data-en="Sets compliance direction and overall operations, keeping the business running steadily within the regulatory framework." data-zh="负责合规方向与整体经营，确保业务在监管框架内稳健运行。" data-tw="負責合規方向與整體經營，確保業務在監管框架內穩健運行。">负责合规方向与整体经营，确保业务在监管框架内稳健运行。</p>
 </div>
 </article>
 <article class="team-item reveal">
 <div class="team-item-body">
-<h3 data-en="Risk Control / Compliance" data-zh="风控 / 合规" data-tw="風控 / 合規">风控 / 合规</h3>
-<p data-en="Coordinates KYC, AML and transaction monitoring, safeguarding the bottom line of funds and compliance." data-zh="统筹 KYC、AML 与交易监控，守住资金与合规底线。" data-tw="統籌 KYC、AML 與交易監控，守住資金與合規底線。">统筹 KYC、AML 与交易监控，守住资金与合规底线。</p>
+<h3 data-en="Risk / Compliance" data-zh="风控 / 合规" data-tw="風控 / 合規">风控 / 合规</h3>
+<p data-en="Owns KYC, AML and transaction monitoring—safeguarding funds and the compliance baseline." data-zh="统筹 KYC、AML 与交易监控，守住资金与合规底线。" data-tw="統籌 KYC、AML 與交易監控，守住資金與合規底線。">统筹 KYC、AML 与交易监控，守住资金与合规底线。</p>
 </div>
 </article>
 <article class="team-item reveal">
 <div class="team-item-body">
 <h3 data-en="Technology &amp; Product" data-zh="技术与产品" data-tw="技術與產品">技术与产品</h3>
-<p data-en="Refines the collection, settlement and reconciliation experience, keeping the system stable and easy to use." data-zh="打磨收款、结算与对账体验，让系统稳定好用。" data-tw="打磨收款、結算與對賬體驗，讓系統穩定好用。">打磨收款、结算与对账体验，让系统稳定好用。</p>
+<p data-en="Refines collection, settlement and reconciliation so the platform stays stable and easy to use." data-zh="打磨收款、结算与对账体验，让系统稳定好用。" data-tw="打磨收款、結算與對賬體驗，讓系統穩定好用。">打磨收款、结算与对账体验，让系统稳定好用。</p>
 </div>
 </article>
 <article class="team-item reveal">
 <div class="team-item-body">
 <h3 data-en="Customer Success" data-zh="客户成功" data-tw="客戶成功">客户成功</h3>
-<p data-en="1v1 account manager accompanying the entire onboarding and daily usage process." data-zh="一对一 客户经理，陪伴开户与日常使用全过程。" data-tw="一對一 客戶經理，陪伴開戶與日常使用全過程。">1v1 客户经理，陪伴开户与日常使用全过程。</p>
+<p data-en="A dedicated account manager supports onboarding and day-to-day operations end to end." data-zh="一对一 客户经理，陪伴开户与日常使用全过程。" data-tw="一對一 客戶經理，陪伴開戶與日常使用全過程。">1v1 客户经理，陪伴开户与日常使用全过程。</p>
 </div>
 </article>
 </div>
@@ -150,36 +210,26 @@ useScrollReveal(root)
 <div class="container">
 <div class="license-layout">
 <div class="license-copy reveal-group">
-<span class="license-kicker reveal" data-en="Regulatory Qualifications" data-zh="监管资质" data-tw="監管資質">监管资质</span>
 <h2 class="reveal" data-en="Hong Kong MSO Licence" data-zh="香港 MSO牌照" data-tw="香港 MSO牌照">香港 MSO 牌照</h2>
 <p class="reveal" data-en="The Money Service Operator licence is issued by Hong Kong Customs, covering currency exchange and remittance services." data-zh="MSO牌照由香港海关发出，涵盖货币兑换与汇款服务。" data-tw="MSO牌照由香港海關發出，涵蓋貨幣兌換與匯款服務。">MSO牌照由香港海关发出，涵盖货币兑换与汇款服务。</p>
-<p class="reveal" data-en="Being licensed means we must comply with anti-money laundering, customer due diligence and client fund handling rules, and accept regulator supervision. This is the foundation of our compliance commitment to clients." data-zh="持牌意味着我们须遵守AML、客户尽职审查与客户资金处理等相关规定，并接受监管机构的监督。这是我们向客户承诺合规的基础。" data-tw="持牌意味着我們須遵守AML、客戶盡職審查與客戶資金處理等相關規定，並接受監管機構的監督。這是我們向客戶承諾合規的基礎。">持牌意味着我们须遵守AML、客户尽职审查与客户资金处理等相关规定，并接受监管机构的监督。这是我们向客户承诺合规的基础。</p>
+<p class="reveal" data-en="Being licensed means we must comply with AML, customer due diligence and client-fund handling rules, and accept regulator supervision. That is the foundation of our compliance commitment to clients." data-zh="持牌意味着我们须遵守AML、客户尽职审查与客户资金处理等相关规定，并接受监管机构的监督。这是我们向客户承诺合规的基础。" data-tw="持牌意味着我們須遵守AML、客戶盡職審查與客戶資金處理等相關規定，並接受監管機構的監督。這是我們向客戶承諾合規的基礎。">持牌意味着我们须遵守AML、客户尽职审查与客户资金处理等相关规定，并接受监管机构的监督。这是我们向客户承诺合规的基础。</p>
 <a class="btn btn-outline reveal" data-en="Learn about Compliance &amp; Security" data-zh="了解合规与安全" data-tw="了解合規與安全" href="/compliance">了解合规与安全</a>
 </div>
 <div class="license-media" aria-hidden="true">
 <figure class="license-figure">
-<img
-  class="license-img"
-  src="/images/about-license.jpg"
-  alt=""
-  width="1200"
-  height="900"
-  loading="lazy"
-  decoding="async"
-/>
+<picture>
+  <source :srcset="aboutLicenseWebp" type="image/webp" />
+  <img
+    class="license-img"
+    :src="aboutLicenseSrc"
+    alt=""
+    width="1200"
+    height="900"
+    loading="lazy"
+    decoding="async"
+  />
+</picture>
 </figure>
-</div>
-</div>
-</div>
-</section>
-<section class="section about-cta-section">
-<div class="container">
-<div class="about-cta">
-<h2 data-en="Want to learn more about our qualifications and services?" data-zh="想进一步了解我们的资质与服务？" data-tw="想進一步了解我們的資質與服務？">想进一步了解我们的资质与服务？</h2>
-<p data-en="Feel free to contact us for materials or to schedule a one-on-one discussion." data-zh="欢迎联系我们，获取资料或预约一对一沟通。" data-tw="歡迎聯繫我們，獲取資料或預約一對一溝通。">欢迎联系我们，获取资料或预约一对一沟通。</p>
-<div class="about-cta-actions">
-<a class="btn btn-primary btn-lg" data-en="Contact Us" data-zh="联系我们" data-tw="聯繫我們" href="/contact">联系我们</a>
-<a class="btn btn-outline btn-lg" data-en="Join Us" data-zh="加入我们" data-tw="加入我們" href="/privacy">加入我们</a>
 </div>
 </div>
 </div>

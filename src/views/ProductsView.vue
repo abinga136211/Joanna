@@ -1,19 +1,181 @@
 <script setup>
-import { ref, computed, nextTick, onMounted, onBeforeUnmount } from 'vue'
+import { ref, nextTick, onMounted, onBeforeUnmount, watch } from 'vue'
+import { useRoute } from 'vue-router'
 import { useProductTabs } from '@/composables/useInteractions'
 import { useScrollReveal } from '@/composables/useScrollReveal'
 import { useLocaleStore } from '@/stores/locale'
 
 const root = ref(null)
 const workflowEl = ref(null)
-const flowTrack = ref(null)
 const flowInview = ref(false)
-useProductTabs(root)
+const route = useRoute()
+const { active: activeSolution, setTab } = useProductTabs(root)
+const activeService = ref('collect')
 useScrollReveal(root)
+
+const productHashes = {
+  '#b2b': 'b2b',
+  '#digital': 'digital',
+  '#family': 'family',
+  '#trade': 'b2b',
+  '#saas': 'digital',
+  '#ecom': 'b2b',
+}
+
+const serviceHashes = {
+  '#collect': 'collect',
+  '#pay': 'pay',
+  '#fx': 'fx',
+}
+
+function setService(key, { scroll = false } = {}) {
+  if (!key) return
+  activeService.value = key
+  if (!scroll || !root.value) return
+  root.value.querySelector('#services')?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+}
+
+function activateProductHash(hash = route.hash) {
+  const solutionTab = productHashes[hash]
+  if (solutionTab) {
+    setTab(solutionTab, { scroll: true })
+    return
+  }
+  const serviceTab = serviceHashes[hash]
+  if (serviceTab) {
+    setService(serviceTab, { scroll: true })
+  }
+}
 
 const locale = useLocaleStore()
 function t(zh, en, tw) {
   return locale.t(zh, en, tw)
+}
+
+const productsHeroSrc = `${import.meta.env.BASE_URL}images/products-hero.jpg`
+const productsHeroWebp = `${import.meta.env.BASE_URL}images/products-hero.webp`
+const imgBase = `${import.meta.env.BASE_URL}images/`
+
+/** 服务与渠道（左侧导航 + 单块内容） */
+const serviceChannelCards = [
+  {
+    key: 'collect',
+    image: 'global-business.jpg',
+    titleZh: '全球收款',
+    titleTw: '全球收款',
+    titleEn: 'Global Collection',
+    subtitleZh: '全球账户，多币种收款',
+    subtitleTw: '全球賬戶，多幣種收款',
+    subtitleEn: 'Local accounts, multi-currency collection',
+    textZh:
+      '面向跨境企业，在主要市场提供本地账户与多币种收款，支持多种贸易模式下的资金流入，全球收付加速，资金在同一平台合规管理',
+    textTw:
+      '面向跨境企業，在主要市場提供本地賬戶與多幣種收款，支持多種貿易模式下的資金流入，全球收付加速，資金在同一平臺合規管理',
+    textEn:
+      'Local accounts and multi-currency collection in key markets—supporting inflows across trade models, faster global settlement, and compliant fund management on one platform.',
+  },
+  {
+    key: 'pay',
+    image: 'intl-payment.jpg',
+    titleZh: '国际付款',
+    titleTw: '國際付款',
+    titleEn: 'International Payouts',
+    subtitleZh: '智能路由，静默直达',
+    subtitleTw: '智能路由，靜默直達',
+    subtitleEn: 'Intelligent routing, seamless delivery',
+    textZh:
+      '基于付款需求，跨渠道拆分支付指令，利用银行间最优路径降低手续费，避免大额资金被单一机构风控延误。付款进度由专属管家主动同步，无需登录多个网银。资金走到哪里，我们比您更先知道。',
+    textTw:
+      '基於付款需求，跨渠道拆分支付指令，利用銀行間最優路徑降低手續費，避免大額資金被單一機構風控延誤。付款進度由專屬管家主動同步，無需登錄多個網銀。資金走到哪裏，我們比您更先知道。',
+    textEn:
+      'We split payout instructions across corridors along optimal interbank paths to reduce fees and avoid single-institution risk delays. Your dedicated relationship manager proactively syncs progress—no juggling multiple bank portals. We know where funds are before you ask.',
+  },
+  {
+    key: 'fx',
+    image: 'fx-currency.jpg',
+    titleZh: '灵活换汇',
+    titleTw: '靈活換匯',
+    titleEn: 'Flexible FX',
+    subtitleZh: '7×24 在线换汇，实时报价',
+    subtitleTw: '7×24 在線換匯，實時報價',
+    subtitleEn: '24/7 online FX with live rates',
+    textZh:
+      '主流币种 7×24 在线换汇，一键操作、实时报价、聚合多家持牌机构汇率、全流程风控，让企业跨境兑换更便捷、更透明、更安全。',
+    textTw:
+      '主流幣種 7×24 在線換匯，一鍵操作、實時報價、聚合多家持牌機構匯率、全流程風控，讓企業跨境兌換更便捷、更透明、更安全。',
+    textEn:
+      '24/7 FX in major currencies—one-click execution, live quotes, aggregated rates from licensed institutions, and end-to-end risk controls for clearer, more secure corporate conversion.',
+  },
+]
+
+function serviceImageSrc(card) {
+  return `${imgBase}${card.image}`
+}
+function serviceImageWebp(card) {
+  return card.imageWebp ? `${imgBase}${card.imageWebp}` : ''
+}
+/** 解决方案：按业务形态定制（左标题区 + 右清单） */
+const solutionCards = [
+  {
+    key: 'b2b',
+    titleZh: '外贸 B2B 供应链企业',
+    titleTw: '外貿 B2B 供應鏈企業',
+    titleEn: 'B2B Trade & Supply Chain',
+    leadZh: '面向大额贸易货款收付场景，以时效与汇率成本可控为核心，保障供应链资金不断链。',
+    leadTw: '面向大額貿易貨款收付場景，以時效與匯率成本可控為核心，保障供應鏈資金不斷鏈。',
+    leadEn: 'Built for large trade pay-ins and payouts—keeping settlement speed and FX costs under control so supply-chain liquidity stays intact.',
+    sceneItems: [
+      { zh: '大额贸易货款收付', tw: '大額貿易貨款收付', en: 'Large-value trade collection and payouts' },
+      { zh: '对到账时效与汇率成本极其敏感', tw: '對到賬時效與匯率成本極其敏感', en: 'Highly sensitive to settlement timing and FX cost' },
+    ],
+    offerItems: [
+      { zh: 'TT 收款专户', tw: 'TT 收款專戶', en: 'Dedicated TT collection accounts' },
+      { zh: '大额付款走专设绿通', tw: '大額付款走專設綠通', en: 'Priority processing for large payouts' },
+      { zh: '避免银行合规反复问询', tw: '避免銀行合規反復問詢', en: 'Fewer repeated bank compliance queries' },
+      { zh: '保障供应链资金不断链', tw: '保障供應鏈資金不斷鏈', en: 'Continuous supply-chain liquidity' },
+    ],
+  },
+  {
+    key: 'digital',
+    titleZh: '服务贸易与数字企业',
+    titleTw: '服務貿易與數字企業',
+    titleEn: 'Services Trade & Digital Businesses',
+    leadZh: '针对软件服务、咨询费、版权金等无形贸易收款，匹配理解行业的持牌通道，收款更稳、合规更顺。',
+    leadTw: '針對軟件服務、諮詢費、版權金等無形貿易收款，匹配理解行業的持牌通道，收款更穩、合規更順。',
+    leadEn: 'For intangible receipts—software, consulting and royalties—matched to licensed corridors that understand the sector, for more stable and compliant collection.',
+    sceneItems: [
+      { zh: '软件服务、咨询费、版权金等无形贸易收款', tw: '軟件服務、諮詢費、版權金等無形貿易收款', en: 'Intangible receipts: software, consulting, royalties' },
+      { zh: '易被传统银行拒收或反复核查', tw: '易被傳統銀行拒收或反復核查', en: 'Often declined or repeatedly reviewed by traditional banks' },
+    ],
+    offerItems: [
+      { zh: '匹配理解该行业的特选 MSO 或银行渠道', tw: '匹配理解該行業的特選 MSO 或銀行渠道', en: 'Curated MSO and bank partners that understand the sector' },
+      { zh: '确保收款稳定合规', tw: '確保收款穩定合規', en: 'Stable, compliant collection' },
+      { zh: '支持支付海外人员薪酬', tw: '支持支付海外人員薪酬', en: 'Support for overseas payroll' },
+    ],
+  },
+  {
+    key: 'family',
+    titleZh: '投资控股与家族办公室',
+    titleTw: '投資控股與家族辦公室',
+    titleEn: 'Investment Holding & Family Offices',
+    leadZh: '服务资本项下资金调度，以授权可控为前提，构建定制化账户与渠道体系。',
+    leadTw: '服務資本項下資金調度，以授權可控為前提，構建定制化賬戶與渠道體系。',
+    leadEn: 'Capital-account fund movements under strict authorisation—custom accounts and payment corridors built around your controls.',
+    sceneItems: [
+      { zh: '资本项下资金调度', tw: '資本項下資金調度', en: 'Capital-account fund movements' },
+      { zh: '授权与信息管控要求高', tw: '授權與信息管控要求高', en: 'High standards for authorisation and information control' },
+    ],
+    offerItems: [
+      { zh: '完全定制化的渠道组合', tw: '完全定制化的渠道組合', en: 'Fully customised corridor mix' },
+      { zh: '多层级账户体系', tw: '多層級賬戶體系', en: 'Multi-tier account structures' },
+      { zh: '专人专办全程跟进', tw: '專人專辦全程跟進', en: 'Dedicated handling end to end' },
+      { zh: '操作记录严格在授权范围内流转', tw: '操作記錄嚴格在授權範圍內流轉', en: 'Activity stays strictly within authorised scope' },
+    ],
+  },
+]
+
+function solutionItemText(item) {
+  return t(item.zh, item.en, item.tw)
 }
 
 const flowSteps = [
@@ -24,7 +186,7 @@ const flowSteps = [
     titleEn: 'Account Opening',
     descZh: '提交资料并完成 KYC 审核',
     descTw: '提交資料並完成 KYC 審核',
-    descEn: 'Submit documents and complete KYC review',
+    descEn: 'Submit documents and complete KYC',
   },
   {
     key: 'collect',
@@ -33,97 +195,54 @@ const flowSteps = [
     titleEn: 'Collection',
     descZh: '本地收款、电汇与订阅收款，覆盖主要进账场景',
     descTw: '本地收款、電匯與訂閱收款，覆蓋主要進賬場景',
-    descEn: 'Local, wire and subscription collection for major inbound scenarios',
+    descEn: 'Local, wire and subscription collection for major inbound flows',
   },
   {
     key: 'hold',
     titleZh: '持有',
     titleTw: '持有',
-    titleEn: 'Holding',
+    titleEn: 'Hold',
     descZh: '多币种余额管理，按需持有结算币种',
     descTw: '多幣種餘額管理，按需持有結算幣種',
-    descEn: 'Multi-currency balances, hold settlement currencies on demand',
+    descEn: 'Manage multi-currency balances; hold settlement currencies as needed',
   },
   {
     key: 'fx',
     titleZh: '币种兑换',
     titleTw: '幣種兌換',
-    titleEn: 'Currency Exchange',
+    titleEn: 'FX',
     descZh: '将余额兑换为所需结算币种',
     descTw: '將餘額兌換為所需結算幣種',
-    descEn: 'Exchange balances into the required settlement currency',
+    descEn: 'Convert balances into the required settlement currency',
   },
   {
     key: 'pay',
     titleZh: '付款',
     titleTw: '付款',
-    titleEn: 'Payment',
-    descZh: '供应商与批量付款，流程留痕可审计',
-    descTw: '供應商與批量付款，流程留痕可審計',
-    descEn: 'Supplier and batch payments with audit-ready records',
+    titleEn: 'Payout',
+    descZh: '供应商付款，流程留痕可审计',
+    descTw: '供應商付款，流程留痕可審計',
+    descEn: 'Supplier payouts with audit-ready records',
   },
 ]
 
-const flowIndex = ref(0)
-const flowLast = computed(() => flowSteps.length - 1)
-
-function flowCardStep() {
-  const track = flowTrack.value
-  if (!track) return 0
-  const card = track.querySelector('.flow-card')
-  if (!card) return 0
-  const styles = getComputedStyle(track)
-  const gap = parseFloat(styles.columnGap || styles.gap) || 20
-  return card.getBoundingClientRect().width + gap
-}
-
-function updateFlowPages() {
-  syncFlowIndex()
-}
-
-function syncFlowIndex() {
-  const track = flowTrack.value
-  const step = flowCardStep()
-  if (!track || !step) return
-  flowIndex.value = Math.min(flowLast.value, Math.max(0, Math.round(track.scrollLeft / step)))
-}
-
-function stepFlow(dir) {
-  goFlow(flowIndex.value + dir)
-}
-
-function goFlow(i) {
-  const track = flowTrack.value
-  const step = flowCardStep()
-  const next = Math.min(flowLast.value, Math.max(0, i))
-  flowIndex.value = next
-  if (!track || !step) return
-  track.scrollTo({ left: next * step, behavior: 'smooth' })
-}
-
-function onFlowScroll() {
-  syncFlowIndex()
-}
-
-function onWorkflowKey(e) {
-  if (!workflowEl.value) return
-  if (e.key === 'ArrowRight') {
-    e.preventDefault()
-    stepFlow(1)
-  } else if (e.key === 'ArrowLeft') {
-    e.preventDefault()
-    stepFlow(-1)
-  }
-}
-
 let flowObserver = null
+
+watch(
+  () => route.hash,
+  (hash) => {
+    activateProductHash(hash)
+  },
+)
 
 onMounted(async () => {
   await nextTick()
-  updateFlowPages()
-  flowTrack.value?.addEventListener('scroll', onFlowScroll, { passive: true })
-  workflowEl.value?.addEventListener('keydown', onWorkflowKey)
-  window.addEventListener('resize', updateFlowPages)
+  if (productHashes[route.hash] || serviceHashes[route.hash]) {
+    activateProductHash()
+  } else {
+    setTab('b2b', { scroll: false })
+    setService('collect', { scroll: false })
+  }
   if (workflowEl.value) {
     flowObserver = new IntersectionObserver(
       (entries) => {
@@ -139,231 +258,239 @@ onMounted(async () => {
 })
 
 onBeforeUnmount(() => {
-  flowTrack.value?.removeEventListener('scroll', onFlowScroll)
-  workflowEl.value?.removeEventListener('keydown', onWorkflowKey)
-  window.removeEventListener('resize', updateFlowPages)
   flowObserver?.disconnect()
 })
 </script>
 
 <template>
-<div ref="root">
+<!-- 产品页根节点：整页连续背景，避免各 section 光晕被裁切出硬缝 -->
+<div ref="root" class="products-page">
 <section class="hero hero-page">
-<div class="container">
-<div class="hero-page-layout">
-<div class="hero-page-copy reveal-group">
-<span class="hero-page-kicker reveal" data-en="Hong Kong MSO Licensed Institution" data-zh="香港 MSO持牌机构" data-tw="香港 MSO持牌機構">香港 MSO持牌机构</span>
-<h1 class="reveal" data-en="Products &amp; Solutions" data-zh="产品与解决方案" data-tw="產品與解決方案">产品与解决方案</h1>
-<p class="lead reveal" data-en="From collection to settlement, covering the core fund flows of cross-border business. Choose the solution that fits your industry scenario." data-zh="从收款到结算，覆盖跨境业务的核心资金环节。按行业场景选择适合你的方案。" data-tw="從收款到結算，覆蓋跨境業務的核心資金環節。按行業場景選擇適合你的方案。">从收款到结算，覆盖跨境业务的核心资金环节。按行业场景选择适合你的方案。</p>
-<a class="btn btn-primary btn-lg reveal" data-en="Get a Quote" data-zh="免费咨询" data-tw="免費諮詢" href="/contact">免费咨询</a>
-</div>
-<div class="hero-page-media">
-<figure class="hero-page-figure">
-<img
-  class="hero-page-img"
-  src="/images/products-hero.jpg"
-  alt=""
-  width="960"
-  height="720"
-  loading="eager"
-  decoding="async"
-/>
-</figure>
-</div>
-</div>
-</div>
+  <div class="hero-page-bg" aria-hidden="true">
+    <span class="hero-page-orb hero-page-orb--tl"></span>
+    <span class="hero-page-orb hero-page-orb--bl"></span>
+    <span class="hero-page-orb hero-page-orb--mid"></span>
+  </div>
+  <div class="container hero-page-inner">
+    <div class="hero-page-copy reveal-group">
+      <h1 class="reveal" data-en="The dedicated payment infrastructure behind your global business" data-zh="您全球业务背后的专属资金通道" data-tw="您全球業務背後的專屬資金通道">您全球业务背后的专属资金通道</h1>
+      <p class="lead reveal" data-en="Backed by licensed credentials and major banking partners, we deliver one-stop cross-border payment services spanning account opening, collection, payouts and FX. Our specialists safeguard compliance and fund security—so you can focus on growing globally." data-zh="依托持牌资质与主流银行渠道，我们提供覆盖开户、收款、付款及换汇的一站式跨境资金服务。跨境合规与资金安全由专业团队保障，企业得以专注全球业务拓展。" data-tw="依托持牌資質與主流銀行渠道，我們提供覆蓋開戶、收款、付款及換匯的一站式跨境資金服務。跨境合規與資金安全由專業團隊保障，企業得以專注全球業務拓展。">依托持牌资质与主流银行渠道，我们提供覆盖开户、收款、付款及换汇的一站式跨境资金服务。跨境合规与资金安全由专业团队保障，企业得以专注全球业务拓展。</p>
+    </div>
+    <div class="hero-page-media" aria-hidden="true">
+      <figure class="hero-page-figure">
+        <picture>
+          <source :srcset="productsHeroWebp" type="image/webp" />
+          <img
+            class="hero-page-img"
+            :src="productsHeroSrc"
+            alt=""
+            width="960"
+            height="720"
+            loading="eager"
+            fetchpriority="high"
+            decoding="async"
+          />
+        </picture>
+      </figure>
+    </div>
+  </div>
 </section>
-<!-- ===== 按行业筛选 ===== -->
-<section class="section scenario-section">
-<div class="container">
-<div class="scenario-head">
-<span class="scenario-kicker" data-en="By Industry Scenario" data-zh="按行业场景" data-tw="按行業場景">按行业场景</span>
-<h2 data-en="Choose the Right Solution for You" data-zh="选择适合你的方案" data-tw="選擇適合你的方案">选择适合你的方案</h2>
-<p data-en="Different industries face different collection and settlement pain points, so we organize our product portfolio accordingly." data-zh="不同行业的收款与结算痛点不同，我们据此组织产品组合。" data-tw="不同行業的收款與結算痛點不同，我們據此組織產品組合。">不同行业的收款与结算痛点不同，我们据此组织产品组合。</p>
-</div>
-<div class="scenario-layout">
-<div class="scenario-tabs tabs" role="tablist" aria-label="行业场景">
-<button class="tab active" data-en="Cross-border E-commerce" data-tab="ecom" data-zh="跨境电商" data-tw="跨境電商" type="button">跨境电商</button>
-<button class="tab" data-en="Cross-border Trade / Export" data-tab="trade" data-zh="外贸出口" data-tw="外貿出口" type="button">外贸出口</button>
-<button class="tab" data-en="SaaS / Software" data-tab="saas" data-zh="软件服务" data-tw="軟件服務" type="button">SaaS / 软件</button>
-<button class="tab" data-en="All Capabilities" data-tab="all" data-zh="全部能力" data-tw="全部能力" type="button">全部能力</button>
-</div>
-<div class="scenario-panels">
-<!-- 跨境电商 -->
-<div class="panel panel-grid active" data-panel="ecom">
-<article class="scenario-card">
-<div class="scenario-card-icon" aria-hidden="true"><svg fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M3 7h18v10H3z"/><path d="M3 11h18"/><path d="M7 15h4"/></svg></div>
-<span class="scenario-card-tag" data-en="Local Collection" data-zh="本地收款" data-tw="本地收款">本地收款</span>
-<h3 data-en="Platform Local Collection Account" data-zh="平台本地收款账户" data-tw="平臺本地收款賬戶">平台本地收款账户</h3>
-<p data-en="Provide local-currency collection accounts for stores; buyers pay locally, reducing intermediary steps." data-zh="为店铺提供本地币种收款账户，买家以本地方式付款，减少中转环节。" data-tw="爲店鋪提供本地幣種收款賬戶，買家以本地方式付款，減少中轉環節。">为店铺提供本地币种收款账户，买家以本地方式付款，减少中转环节。</p>
-<ul class="feature-list">
-<li><svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M5 12l4 4 10-10"/></svg><span data-en="Multi-store Fund Aggregation" data-zh="多店铺资金归集" data-tw="多店鋪資金歸集">多店铺资金归集</span></li>
-<li><svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M5 12l4 4 10-10"/></svg><span data-en="Traceable Payouts" data-zh="回款可追踪" data-tw="回款可追蹤">回款可追踪</span></li>
-</ul>
-</article>
-<article class="scenario-card">
-<div class="scenario-card-icon" aria-hidden="true"><svg fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M3 12h18"/><path d="M12 3a14 14 0 010 18"/></svg></div>
-<span class="scenario-card-tag" data-en="Settlement" data-zh="结算" data-tw="結算">结算</span>
-<h3 data-en="Multi-currency Hold &amp; Settlement" data-zh="多币种持有与结算" data-tw="多幣種持有與結算">多币种持有与结算</h3>
-<p data-en="Choose settlement timing to your business rhythm, reducing unnecessary FX loss." data-zh="按业务节奏选择结算时点，减少不必要的换汇损耗。" data-tw="按業務節奏選擇結算時點，減少不必要的換匯損耗。">按业务节奏选择结算时点，减少不必要的换汇损耗。</p>
-<ul class="feature-list">
-<li><svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M5 12l4 4 10-10"/></svg><span data-en="Exchange on Demand" data-zh="按需换汇" data-tw="按需換匯">按需换汇</span></li>
-<li><svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M5 12l4 4 10-10"/></svg><span data-en="Transparent Fees" data-zh="费率透明" data-tw="費率透明">费率透明</span></li>
-</ul>
-</article>
-<article class="scenario-card">
-<div class="scenario-card-icon" aria-hidden="true"><svg fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M3 3h18v18H3z"/><path d="M3 9h18M9 21V9"/></svg></div>
-<span class="scenario-card-tag" data-en="Reconciliation" data-zh="对账" data-tw="對賬">对账</span>
-<h3 data-en="Automated Reconciliation" data-zh="自动对账" data-tw="自動對賬">自动对账</h3>
-<p data-en="Clear, exportable statements lighten the finance reconciliation burden." data-zh="流水清晰可导出，减轻财务对账负担。" data-tw="流水清晰可導出，減輕財務對賬負擔。">流水清晰可导出，减轻财务对账负担。</p>
-<ul class="feature-list">
-<li><svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M5 12l4 4 10-10"/></svg><span data-en="Exportable Details" data-zh="明细可导出" data-tw="明細可導出">明细可导出</span></li>
-<li><svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M5 12l4 4 10-10"/></svg><span data-en="Multi-account View" data-zh="多账户视图" data-tw="多賬戶視圖">多账户视图</span></li>
-</ul>
-</article>
-</div>
-<!-- 外贸出口 -->
-<div class="panel panel-grid" data-panel="trade">
-<article class="scenario-card" id="receive">
-<div class="scenario-card-icon" aria-hidden="true"><svg fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M12 3v12"/><path d="M8 11l4 4 4-4"/><path d="M4 19h16"/></svg></div>
-<span class="scenario-card-tag" data-en="Collection" data-zh="收款" data-tw="收款">收款</span>
-<h3 data-en="Wire Collection" data-zh="电汇收款" data-tw="電匯收款">电汇收款</h3>
-<p data-en="Cross-border wire collection from overseas buyers, with clear collection details and traceable records." data-zh="面向海外买家的跨境电汇收款，提供清晰收款信息，流水留痕。" data-tw="面向海外買家的跨境電匯收款，提供清晰收款信息，流水留痕。">面向海外买家的跨境电汇收款，提供清晰收款信息，流水留痕。</p>
-<ul class="feature-list">
-<li><svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M5 12l4 4 10-10"/></svg><span data-en="Multi-currency Credit" data-zh="多币种入账" data-tw="多幣種入賬">多币种入账</span></li>
-<li><svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M5 12l4 4 10-10"/></svg><span data-en="Arrival Notification" data-zh="到账通知" data-tw="到賬通知">到账通知</span></li>
-</ul>
-</article>
-<article class="scenario-card" id="pay">
-<div class="scenario-card-icon" aria-hidden="true"><svg fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M4 12h14"/><path d="M13 7l5 5-5 5"/></svg></div>
-<span class="scenario-card-tag" data-en="Payment" data-zh="付款" data-tw="付款">付款</span>
-<h3 data-en="Batch Supplier Payments" data-zh="供应商批量付款" data-tw="供應商批量付款">供应商批量付款</h3>
-<p data-en="Batch payments to overseas suppliers with compliant processes, complete documents and easy audit." data-zh="向海外供应商批量付款，流程合规、单据齐全、便于审计。" data-tw="向海外供應商批量付款，流程合規、單據齊全、便於審計。">向海外供应商批量付款，流程合规、单据齐全、便于审计。</p>
-<ul class="feature-list">
-<li><svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M5 12l4 4 10-10"/></svg><span data-en="Batch Processing" data-zh="批量处理" data-tw="批量處理">批量处理</span></li>
-<li><svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M5 12l4 4 10-10"/></svg><span data-en="Traceable Payments" data-zh="付款留痕" data-tw="付款留痕">付款留痕</span></li>
-</ul>
-</article>
-<article class="scenario-card">
-<div class="scenario-card-icon" aria-hidden="true"><svg fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M12 3l8 4v6c0 5-3.5 8-8 9-4.5-1-8-4-8-9V7l8-4z"/><path d="M9 12l2 2 4-4"/></svg></div>
-<span class="scenario-card-tag" data-en="Compliance" data-zh="合规" data-tw="合規">合规</span>
-<h3 data-en="Trade Background Review" data-zh="贸易背景审核" data-tw="貿易背景審核">贸易背景审核</h3>
-<p data-en="Verify trade authenticity per regulatory requirements to ensure compliant fund flows." data-zh="依据监管要求完成贸易真实性核验，保障资金合规流动。" data-tw="依據監管要求完成貿易真實性核驗，保障資金合規流動。">依据监管要求完成贸易真实性核验，保障资金合规流动。</p>
-<ul class="feature-list">
-<li><svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M5 12l4 4 10-10"/></svg><span data-en="KYC / Due Diligence" data-zh="KYC / 业务尽调" data-tw="KYC / 業務盡調">KYC / 尽调</span></li>
-<li><svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M5 12l4 4 10-10"/></svg><span data-en="Risk Monitoring" data-zh="风控监控" data-tw="風控監控">风控监控</span></li>
-</ul>
-</article>
-</div>
-<!-- SaaS -->
-<div class="panel panel-grid" data-panel="saas">
-<article class="scenario-card">
-<div class="scenario-card-icon" aria-hidden="true"><svg fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 10h18"/><path d="M8 15h3"/></svg></div>
-<span class="scenario-card-tag" data-en="Subscription" data-zh="订阅" data-tw="訂閱">订阅</span>
-<h3 data-en="Global Subscription Collection" data-zh="全球订阅收款" data-tw="全球訂閱收款">全球订阅收款</h3>
-<p data-en="Let global users pay locally, with funds unified into multi-currency accounts." data-zh="支持全球用户以本地方式付费，资金统一归集到多币种账户。" data-tw="支持全球用戶以本地方式付費，資金統一歸集到多幣種賬戶。">支持全球用户以本地方式付费，资金统一归集到多币种账户。</p>
-<ul class="feature-list">
-<li><svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M5 12l4 4 10-10"/></svg><span data-en="Local Collection Experience" data-zh="本地收款体验" data-tw="本地收款體驗">本地收款体验</span></li>
-<li><svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M5 12l4 4 10-10"/></svg><span data-en="Unified Aggregation" data-zh="统一归集" data-tw="統一歸集">统一归集</span></li>
-</ul>
-</article>
-<article class="scenario-card" id="va">
-<div class="scenario-card-icon" aria-hidden="true"><svg fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><rect x="3" y="6" width="18" height="13" rx="2"/><path d="M3 10h18"/><path d="M8 15h8"/></svg></div>
-<span class="scenario-card-tag" data-en="Account" data-zh="账户" data-tw="賬戶">账户</span>
-<h3 data-en="Virtual Account Splitting" data-zh="虚拟账户分账" data-tw="虛擬賬戶分賬">虚拟账户分账</h3>
-<p data-en="Open virtual accounts by product or region for clear revenue visibility and easy split accounting." data-zh="按产品或区域开立虚拟账户，收入一目了然，便于分账核算。" data-tw="按產品或區域開立虛擬賬戶，收入一目了然，便於分賬核算。">按产品或区域开立虚拟账户，收入一目了然，便于分账核算。</p>
-<ul class="feature-list">
-<li><svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M5 12l4 4 10-10"/></svg><span data-en="Multi-account Management" data-zh="多账户管理" data-tw="多賬戶管理">多账户管理</span></li>
-<li><svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M5 12l4 4 10-10"/></svg><span data-en="Clear Split Accounting" data-zh="清晰分账" data-tw="清晰分賬">清晰分账</span></li>
-</ul>
-</article>
-<article class="scenario-card">
-<div class="scenario-card-icon" aria-hidden="true"><svg fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M3 12h18"/></svg></div>
-<span class="scenario-card-tag" data-en="Settlement" data-zh="结算" data-tw="結算">结算</span>
-<h3 data-en="Multi-currency Settlement" data-zh="多币种结算" data-tw="多幣種結算">多币种结算</h3>
-<p data-en="Hold subscription income and settle to local currency on demand, smoothing FX volatility." data-zh="持有订阅收入，按需结算为本币，平滑汇率波动。" data-tw="持有訂閱收入，按需結算爲本幣，平滑匯率波動。">持有订阅收入，按需结算为本币，平滑汇率波动。</p>
-<ul class="feature-list">
-<li><svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M5 12l4 4 10-10"/></svg><span data-en="Settle on Demand" data-zh="按需结算" data-tw="按需結算">按需结算</span></li>
-<li><svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M5 12l4 4 10-10"/></svg><span data-en="Transparent FX Rates" data-zh="汇率透明" data-tw="匯率透明">汇率透明</span></li>
-</ul>
-</article>
-</div>
-<!-- 全部能力 -->
-<div class="panel panel-grid" data-panel="all">
-<article class="scenario-card scenario-card-compact">
-<div class="scenario-card-icon" aria-hidden="true"><svg fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M3 7h18v10H3z"/><path d="M3 11h18"/></svg></div>
-<h3 data-en="Cross-border Collection" data-zh="跨境收款" data-tw="跨境收款" id="settle">跨境收款</h3>
-<p data-en="Local-currency collection accounts reduce intermediaries and FX loss." data-zh="本地币种收款账户，减少中转与汇损。" data-tw="本地幣種收款賬戶，減少中轉與匯損。">本地币种收款账户，减少中转与汇损。</p>
-</article>
-<article class="scenario-card scenario-card-compact">
-<div class="scenario-card-icon" aria-hidden="true"><svg fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M3 12h18"/></svg></div>
-<h3 data-en="Multi-currency Settlement" data-zh="多币种结算" data-tw="多幣種結算">多币种结算</h3>
-<p data-en="Hold and settle multiple currencies, flexibly timing your exchange." data-zh="持有与结算多币种，灵活把握换汇时点。" data-tw="持有與結算多幣種，靈活把握換匯時點。">持有与结算多币种，灵活把握换汇时点。</p>
-</article>
-<article class="scenario-card scenario-card-compact">
-<div class="scenario-card-icon" aria-hidden="true"><svg fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><rect height="13" rx="2" width="18" x="3" y="6"/><path d="M3 10h18"/></svg></div>
-<h3 data-en="Virtual Accounts" data-zh="虚拟账户" data-tw="虛擬賬戶">虚拟账户</h3>
-<p data-en="Independent virtual accounts keep funds clearly separable." data-zh="独立虚拟账户，资金清晰可分。" data-tw="獨立虛擬賬戶，資金清晰可分。">独立虚拟账户，资金清晰可分。</p>
-</article>
-<article class="scenario-card scenario-card-compact">
-<div class="scenario-card-icon" aria-hidden="true"><svg fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M4 12h14"/><path d="M13 7l5 5-5 5"/></svg></div>
-<h3 data-en="Supplier Payments" data-zh="供应商付款" data-tw="供應商付款">供应商付款</h3>
-<p data-en="Multi-currency batch payments, compliant and traceable." data-zh="多币种批量付款，合规可查。" data-tw="多幣種批量付款，合規可查。">多币种批量付款，合规可查。</p>
-</article>
-<article class="scenario-card scenario-card-compact">
-<div class="scenario-card-icon" aria-hidden="true"><svg fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M12 2v20M2 12h20"/></svg></div>
-<h3 data-en="Currency Exchange" data-zh="货币兑换" data-tw="貨幣兌換">货币兑换</h3>
-<p data-en="Currency exchange services within licence scope." data-zh="牌照范围内的货币兑换服务。" data-tw="牌照範圍內的貨幣兌換服務。">牌照范围内的货币兑换服务。</p>
-</article>
-<article class="scenario-card scenario-card-compact">
-<div class="scenario-card-icon" aria-hidden="true"><svg fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M3 3h18v18H3z"/><path d="M3 9h18M9 21V9"/></svg></div>
-<h3 data-en="Reconciliation &amp; Reporting" data-zh="对账与报表" data-tw="對賬與報表">对账与报表</h3>
-<p data-en="Statement export and detail lookup facilitate financial accounting." data-zh="流水导出、明细可查，便于财务核算。" data-tw="流水導出、明細可查，便於財務核算。">流水导出、明细可查，便于财务核算。</p>
-</article>
-</div>
-</div>
-</div>
-</div>
+<!-- ===== 解决方案 ===== -->
+<section class="section scenario-section" id="solutions">
+  <div class="container">
+    <div class="scenario-head">
+      <h2
+        data-en="Tailored solutions for different business models."
+        data-zh="为不同业务形态，量身定制的专属方案。"
+        data-tw="爲不同業務形態，量身定制的專屬方案。"
+      >为不同业务形态，量身定制的专属方案。</h2>
+    </div>
+
+    <div class="scenario-layout">
+      <div
+        class="scenario-tabs tabs"
+        role="tablist"
+        aria-orientation="vertical"
+        :aria-label="t('解决方案', 'Solutions', '解決方案')"
+      >
+        <button
+          v-for="card in solutionCards"
+          :id="'tab-' + card.key"
+          :key="'tab-' + card.key"
+          class="tab"
+          :class="{ active: activeSolution === card.key }"
+          :data-tab="card.key"
+          type="button"
+          role="tab"
+          :aria-selected="activeSolution === card.key"
+          :aria-controls="'panel-' + card.key"
+          :tabindex="activeSolution === card.key ? 0 : -1"
+          :data-en="card.titleEn"
+          :data-zh="card.titleZh"
+          :data-tw="card.titleTw"
+        >{{ t(card.titleZh, card.titleEn, card.titleTw) }}</button>
+      </div>
+
+      <div class="scenario-panels">
+        <div
+          v-for="card in solutionCards"
+          :id="'panel-' + card.key"
+          :key="'panel-' + card.key"
+          class="panel scenario-panel"
+          :class="{ active: activeSolution === card.key }"
+          :data-panel="card.key"
+          :data-solution="card.key"
+          role="tabpanel"
+          :aria-labelledby="'tab-' + card.key"
+          :hidden="activeSolution !== card.key"
+        >
+          <div class="scenario-detail">
+            <div class="scenario-detail-lists">
+              <div class="scenario-detail-group">
+                <h4
+                  class="scenario-detail-group-title"
+                  data-en="Target clients"
+                  data-zh="适用客户"
+                  data-tw="適用客戶"
+                >适用客户</h4>
+                <ul class="scenario-detail-list">
+                  <li v-for="(item, itemIdx) in card.sceneItems" :key="card.key + '-scene-' + itemIdx">
+                    {{ solutionItemText(item) }}
+                  </li>
+                </ul>
+              </div>
+              <div class="scenario-detail-group">
+                <h4
+                  class="scenario-detail-group-title"
+                  data-en="Core value"
+                  data-zh="核心价值"
+                  data-tw="核心價值"
+                >核心价值</h4>
+                <ul class="scenario-detail-list">
+                  <li v-for="(item, itemIdx) in card.offerItems" :key="card.key + '-offer-' + itemIdx">
+                    {{ solutionItemText(item) }}
+                  </li>
+                </ul>
+              </div>
+            </div>
+            <div class="scenario-detail-intro">
+              <p class="scenario-detail-lead">{{ t(card.leadZh, card.leadEn, card.leadTw) }}</p>
+              <a class="scenario-detail-cta" href="/contact">
+                {{ t('预约咨询', 'Book a consultation', '預約諮詢') }}
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+<!-- ===== 服务与渠道 ===== -->
+<section class="section solution-services-section" id="services">
+  <div class="container">
+    <div class="services-cards-head">
+      <h2
+        data-en="Services &amp; Corridors"
+        data-zh="服务与渠道"
+        data-tw="服務與渠道"
+      >服务与渠道</h2>
+      <p
+        data-en="Payment corridors built around your business."
+        data-zh="为您构建的专属通道"
+        data-tw="為您構建的專屬通道"
+      >为您构建的专属通道</p>
+    </div>
+
+    <div
+      class="services-tabs"
+      role="tablist"
+      aria-orientation="horizontal"
+      :aria-label="t('服务与渠道', 'Services & Channels', '服務與渠道')"
+    >
+      <button
+        v-for="(card, idx) in serviceChannelCards"
+        :id="'service-tab-' + card.key"
+        :key="'service-tab-' + card.key"
+        class="services-tab"
+        :class="{ active: activeService === card.key }"
+        type="button"
+        role="tab"
+        :aria-selected="activeService === card.key"
+        :aria-controls="card.key"
+        :tabindex="activeService === card.key ? 0 : -1"
+        @click="setService(card.key)"
+      >
+        <span class="services-tab__index" aria-hidden="true">{{ String(idx + 1).padStart(2, '0') }}</span>
+        <span
+          class="services-tab__label"
+          :data-en="card.titleEn"
+          :data-zh="card.titleZh"
+          :data-tw="card.titleTw"
+        >{{ t(card.titleZh, card.titleEn, card.titleTw) }}</span>
+      </button>
+    </div>
+
+    <div class="services-panels">
+      <article
+        v-for="card in serviceChannelCards"
+        :id="card.key"
+        :key="'service-panel-' + card.key"
+        class="services-panel"
+        :class="{ active: activeService === card.key }"
+        role="tabpanel"
+        :aria-labelledby="'service-tab-' + card.key"
+        :hidden="activeService !== card.key"
+      >
+        <div class="services-panel__inner">
+          <div class="services-band__visual">
+            <span class="services-band__glow" aria-hidden="true"></span>
+            <figure class="services-band__media">
+              <picture>
+                <source
+                  v-if="serviceImageWebp(card)"
+                  :srcset="serviceImageWebp(card)"
+                  type="image/webp"
+                />
+                <img
+                  :src="serviceImageSrc(card)"
+                  :alt="t(card.titleZh, card.titleEn, card.titleTw)"
+                  width="720"
+                  height="540"
+                  loading="lazy"
+                  decoding="async"
+                />
+              </picture>
+            </figure>
+          </div>
+          <div class="services-band__copy">
+            <h4 class="services-band__title">{{ t(card.titleZh, card.titleEn, card.titleTw) }}</h4>
+            <span class="services-band__kicker">{{ t(card.subtitleZh, card.subtitleEn, card.subtitleTw) }}</span>
+            <p class="services-band__body">{{ t(card.textZh, card.textEn, card.textTw) }}</p>
+          </div>
+        </div>
+      </article>
+    </div>
+  </div>
 </section>
 <!-- ===== 业务流转 + 能力总览 ===== -->
 <section
   class="section flow-slide-section"
   id="workflow"
   ref="workflowEl"
-  tabindex="0"
   :class="{ 'flow-inview': flowInview }"
-  :aria-label="t('资金链路步骤', 'Fund chain steps', '資金鏈路步驟')"
+  :aria-label="t('资金链路步骤', 'Payments workflow steps', '資金鏈路步驟')"
 >
 <div class="container">
 <div class="flow-slide-head">
-<span class="flow-slide-kicker" data-en="How It Works · Capabilities" data-zh="业务流转 · 能力总览" data-tw="業務流轉 · 能力總覽">业务流转 · 能力总览</span>
-<h2 data-en="From account opening to fund settlement, one clear fund chain" data-zh="从开户到资金结算，一条清晰的资金链路" data-tw="從開戶到資金結算，一條清晰的資金鍊路">从开户到资金结算，一条清晰的资金链路</h2>
-<p data-en="Around the core of cross-border pay-in/out, ADG PAY provides coherent services from collection and holding to payment settlement — one account suite covering major fund flows." data-zh="围绕跨境收付的核心环节，ADG PAY 为企业提供从收款、持币到付款结算的连贯服务；一套账户，覆盖主要资金环节。" data-tw="圍繞跨境收付的核心環節，ADG PAY 爲企業提供從收款、持幣到付款結算的連貫服務；一套賬戶，覆蓋主要資金環節。">围绕跨境收付的核心环节，ADG PAY 为企业提供从收款、持币到付款结算的连贯服务；一套账户，覆盖主要资金环节。</p>
+<h2 data-en="From account opening to settlement—one clear payments workflow" data-zh="从开户到资金结算，一条清晰的资金链路" data-tw="從開戶到資金結算，一條清晰的資金鍊路">从开户到资金结算，一条清晰的资金链路</h2>
+<p data-en="Around the core of cross-border collection and payout, ADG PAY delivers a connected journey from collection and holding through to settlement—one account suite covering the main fund flows." data-zh="围绕跨境收付的核心环节，ADG PAY 为企业提供从收款、持币到付款结算的连贯服务；一套账户，覆盖主要资金环节。" data-tw="圍繞跨境收付的核心環節，ADG PAY 爲企業提供從收款、持幣到付款結算的連貫服務；一套賬戶，覆蓋主要資金環節。">围绕跨境收付的核心环节，ADG PAY 为企业提供从收款、持币到付款结算的连贯服务；一套账户，覆盖主要资金环节。</p>
 </div>
 
 <div class="flow-slide">
-<button
-  class="flow-slide-nav"
-  type="button"
-  :aria-label="t('上一步', 'Previous', '上一步')"
-  :disabled="flowIndex === 0"
-  @click="stepFlow(-1)"
->
-<svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true"><path d="M15 6l-6 6 6 6"/></svg>
-</button>
-
-<div class="flow-slide-viewport">
-<div class="flow-slide-track" ref="flowTrack">
 <article
-  v-for="(step, i) in flowSteps"
+  v-for="step in flowSteps"
   :key="step.key"
   class="flow-card"
-  :class="{ active: flowIndex === i }"
-  role="button"
-  tabindex="0"
-  :aria-current="flowIndex === i ? 'true' : undefined"
-  @click="goFlow(i)"
-  @keydown.enter.prevent="goFlow(i)"
 >
   <div class="flow-card-icon" aria-hidden="true">
     <svg v-if="step.key === 'open'" viewBox="0 0 64 64" fill="none"><rect x="12" y="10" width="40" height="44" rx="6" fill="#FFF5F4" stroke="#E1251B" stroke-width="2"/><path d="M22 24h20M22 32h16M22 40h12" stroke="#E1251B" stroke-width="2" stroke-linecap="round"/><circle cx="44" cy="46" r="8" fill="#E1251B"/><path d="M41 46l2 2 4-4" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
@@ -375,54 +502,6 @@ onBeforeUnmount(() => {
   <strong>{{ t(step.titleZh, step.titleEn, step.titleTw) }}</strong>
   <p>{{ t(step.descZh, step.descEn, step.descTw) }}</p>
 </article>
-</div>
-</div>
-
-<button
-  class="flow-slide-nav"
-  type="button"
-  :aria-label="t('下一步', 'Next', '下一步')"
-  :disabled="flowIndex >= flowLast"
-  @click="stepFlow(1)"
->
-<svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg>
-</button>
-</div>
-
-<div class="flow-slide-dots" role="tablist" :aria-label="t('资金链路步骤', 'Fund chain steps', '資金鏈路步驟')">
-<button
-  v-for="(step, i) in flowSteps"
-  :key="step.key"
-  type="button"
-  class="flow-slide-dot"
-  :class="{ active: flowIndex === i }"
-  :aria-label="t(step.titleZh, step.titleEn, step.titleTw)"
-  :aria-current="flowIndex === i ? 'true' : undefined"
-  @click="goFlow(i)"
-></button>
-</div>
-</div>
-</section>
-<!-- ===== 客户方案匹配 / 好评引导 ===== -->
-<section class="section quote-section" id="match">
-<div class="container">
-<div class="quote-head">
-<span class="quote-kicker" data-en="Customer Stories" data-zh="客户好评" data-tw="客戶好評">客户好评</span>
-<h2 data-en="Not sure which solution fits you?" data-zh="不确定哪套方案适合你？" data-tw="不確定哪套方案適合你？">不确定哪套方案适合你？</h2>
-<p data-en="Tell us about your business and collection scenario, and our local team will match one for you." data-zh="告诉我们你的业务与收款场景，由本地团队为你匹配。" data-tw="告訴我們你的業務與收款場景，由本地團隊爲你匹配。">告诉我们你的业务与收款场景，由本地团队为你匹配。</p>
-</div>
-
-<div class="quote-trust" aria-hidden="true">
-<span data-en="Cross-border E-commerce" data-zh="跨境电商" data-tw="跨境電商">跨境电商</span>
-<span data-en="Trade Export" data-zh="外贸出口" data-tw="外貿出口">外贸出口</span>
-<span data-en="SaaS" data-zh="SaaS / 软件" data-tw="SaaS / 軟件">SaaS / 软件</span>
-<span data-en="MSO Licensed" data-zh="MSO 持牌" data-tw="MSO 持牌">MSO 持牌</span>
-<span data-en="Transparent Fees" data-zh="费率透明" data-tw="費率透明">费率透明</span>
-<span data-en="Local Team" data-zh="本地团队" data-tw="本地團隊">本地团队</span>
-</div>
-
-<div class="quote-actions">
-<a class="btn btn-primary btn-lg" data-en="Contact an Advisor" data-zh="联系顾问" data-tw="聯繫顧問" href="/contact">联系顾问</a>
 </div>
 </div>
 </section>

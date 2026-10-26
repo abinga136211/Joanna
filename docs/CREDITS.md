@@ -45,6 +45,8 @@
 | `faq-hero.jpg` | FAQ 头图 | John Schnobrich | https://unsplash.com/photos/three-person-pointing-the-silver-laptop-computer-2FPjlAyMQTA | Unsplash License | ✓ |
 | `products-hero.jpg` | Products 头图 | Blake Wisz | https://unsplash.com/photos/person-holding-black-android-smartphone-c9FQyqIECds | Unsplash License | ✓ |
 | `products-core.jpg` | 首页产品配图 | Cheung Yin | https://unsplash.com/photos/a-boat-in-a-body-of-water-with-a-city-in-the-background-prpiqPhdy3A | Unsplash License | ✓ |
+| `intl-payment.jpg` | 产品页·国际付款 | Kristin Hardwick | https://stocksnap.io/photo/work-business-J5LXKNDREC | CC0 1.0 | ✓ |
+| `fx-currency.jpg` | 产品页·灵活换汇 | Skitter Photo | https://stocksnap.io/photo/money-currency-WTER880LH2 | CC0 1.0 | ✓ |
 
 ### 建议署名格式（可选）
 

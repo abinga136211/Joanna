@@ -7,6 +7,7 @@ import { seedJobsIfEmpty } from './db/seed.js'
 import { attachAdmin } from './middleware/auth.js'
 import authRouter from './routes/auth.js'
 import { configPublicRouter, configAdminRouter } from './routes/config.js'
+import { faqTopicsPublicRouter, faqTopicsAdminRouter } from './routes/faqTopics.js'
 import { inquiriesPublicRouter, inquiriesAdminRouter } from './routes/inquiries.js'
 import { jobsPublicRouter, jobsAdminRouter } from './routes/jobs.js'
 import {
@@ -14,10 +15,12 @@ import {
   applicationsAdminRouter,
 } from './routes/applications.js'
 import tablesAdminRouter from './routes/tables.js'
+import { chatPublicRouter, chatAdminRouter } from './routes/chat.js'
+import { emailLogsAdminRouter } from './routes/emailLogs.js'
 
 loadEnvFile()
 
-const PORT = Number(process.env.PORT || 3001)
+const PORT = Number(process.env.PORT || 3003)
 
 initDb()
 seedJobsIfEmpty()
@@ -41,15 +44,20 @@ app.get('/api/health', (_req, res) => {
 })
 
 app.use('/api', configPublicRouter)
+app.use('/api', faqTopicsPublicRouter)
 app.use('/api', inquiriesPublicRouter)
 app.use('/api', jobsPublicRouter)
 app.use('/api', applicationsPublicRouter)
+app.use('/api', chatPublicRouter)
 
 app.use('/api/admin', authRouter)
 app.use('/api/admin', configAdminRouter)
+app.use('/api/admin', faqTopicsAdminRouter)
 app.use('/api/admin', inquiriesAdminRouter)
 app.use('/api/admin', jobsAdminRouter)
 app.use('/api/admin', applicationsAdminRouter)
+app.use('/api/admin', chatAdminRouter)
+app.use('/api/admin', emailLogsAdminRouter)
 app.use('/api/admin', tablesAdminRouter)
 
 app.use((err, _req, res, _next) => {

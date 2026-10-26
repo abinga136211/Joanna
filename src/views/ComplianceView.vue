@@ -1,39 +1,64 @@
 <script setup>
+const assetBase = import.meta.env.BASE_URL
+const complianceHeroSrc = `${assetBase}images/compliance-hero.jpg`
+const complianceHeroWebp = `${assetBase}images/compliance-hero.webp`
+const complianceFundsSrc = `${assetBase}images/compliance-funds.jpg`
+const complianceFundsWebp = `${assetBase}images/compliance-funds.webp`
 </script>
 
 <template>
-<section class="hero hero-page">
-<div class="container">
-<div class="hero-page-layout">
-<div class="hero-page-copy">
-<span class="hero-page-kicker" data-en="Regulated Operations" data-zh="受监管经营" data-tw="受監管經營">受监管经营</span>
-<h1 data-en="Compliance &amp; Security" data-zh="合规与安全" data-tw="合規與安全">合规与安全</h1>
-<p class="lead" data-en="Compliance is not a slogan but the premise of every transaction we conduct. Below are our real commitments to clients." data-zh="合规不是口号，而是我们开展每一笔业务的前提。以下是我们对客户的真实承诺。" data-tw="合規不是口號，而是我們開展每一筆業務的前提。以下是我們對客戶的真實承諾。">合规不是口号，而是我们开展每一笔业务的前提。以下是我们对客户的真实承诺。</p>
-<a class="btn btn-primary btn-lg" data-en="Contact Us" data-zh="联系我们" data-tw="聯繫我們" href="/contact">联系我们</a>
-</div>
-<div class="hero-page-media">
-<figure class="hero-page-figure">
-<img
-  class="hero-page-img"
-  src="/images/compliance-hero.jpg"
-  alt="Regulated operations, compliance and justice"
-  width="960"
-  height="720"
-  loading="eager"
-  decoding="async"
-/>
-</figure>
-</div>
-</div>
-</div>
+<!-- 合规页根节点：整页连续背景，柔化 Hero→内容与各区块硬切 -->
+<div class="compliance-page">
+<section class="hero hero-page hero-page--cover">
+  <div class="hero-page-media" aria-hidden="true">
+    <picture>
+      <source :srcset="complianceHeroWebp" type="image/webp" />
+      <img
+        class="hero-page-img"
+        :src="complianceHeroSrc"
+        alt=""
+        width="960"
+        height="720"
+        loading="eager"
+        fetchpriority="high"
+        decoding="async"
+      />
+    </picture>
+  </div>
+  <div class="hero-page-veil" aria-hidden="true"></div>
+  <div class="container">
+    <div class="hero-page-copy">
+      <h1
+        data-en="Privacy and security are the infrastructure of our service"
+        data-zh="隐私与安全，是我们服务的基础设施"
+        data-tw="隱私與安全，是我們服務的基礎設施"
+      >隐私与安全，是我们服务的基础设施</h1>
+      <ul class="hero-page-points">
+        <li
+          data-en="Mutual NDAs; all business data uses encryption in transit and at rest."
+          data-zh="签署双向 NDA，所有商业数据在传输与存储全程加密。"
+          data-tw="簽署雙向 NDA，所有商業數據在傳輸與存儲全程加密。"
+        >签署双向 NDA，所有商业数据在传输与存储全程加密。</li>
+        <li
+          data-en="Client files are sharded."
+          data-zh="客户档案分片管理。"
+          data-tw="客戶檔案分片管理。"
+        >客户档案分片管理。</li>
+        <li
+          data-en="Your enterprise growth story will not become our marketing case unless we have explicit authorization."
+          data-zh="您的企业成长故事不会成为我们营销案例，除非获得明确授权"
+          data-tw="您的企業成長故事不會成為我們營銷案例，除非獲得明確授權"
+        >您的企业成长故事不会成为我们营销案例，除非获得明确授权</li>
+      </ul>
+    </div>
+  </div>
 </section>
 
 <!-- ===== 合规框架 ===== -->
-<section class="section cmp-section">
+<section class="section cmp-section" id="framework">
 <div class="container">
 <div class="cmp-split">
 <div class="cmp-copy">
-<span class="cmp-kicker" data-en="Compliance Framework" data-zh="合规框架" data-tw="合規框架">合规框架</span>
 <h2 data-en="Operating Under Regulation" data-zh="在监管之下开展业务" data-tw="在監管之下開展業務">在监管之下开展业务</h2>
 <p data-en="We hold a Hong Kong MSO licence, supervised by Hong Kong Customs, and comply with anti-money laundering and customer due diligence rules." data-zh="我们持有香港 MSO牌照，受香港海关监管，遵守AML与客户尽职审查等相关规定。" data-tw="我們持有香港 MSO牌照，受香港海關監管，遵守AML與客戶盡職審查等相關規定。">我们持有香港 MSO 牌照，受香港海关监管，遵守AML与客户尽职审查等相关规定。</p>
 </div>
@@ -43,11 +68,11 @@
 <p data-en="The Money Service Operator licence is issued by Hong Kong Customs; operations are regulated and supervised." data-zh="MSO牌照由香港海关发出，经营受监管约束，并接受监督。" data-tw="MSO牌照由香港海關發出，經營受監管約束，並接受監督。">MSO牌照由香港海关发出，经营受监管约束，并接受监督。</p>
 </article>
 <article class="cmp-item">
-<h3 data-en="KYC Client Due Diligence" data-zh="KYC 客户尽调" data-tw="KYC 客戶盡調">KYC 客户尽调</h3>
-<p data-en="Complete customer identity and business background verification before onboarding to reduce risk at the source." data-zh="开户前完成客户身份与业务背景核验，从源头降低风险。" data-tw="開戶前完成客戶身份與業務背景核驗，從源頭降低風險。">开户前完成客户身份与业务背景核验，从源头降低风险。</p>
+<h3 data-en="Client Due Diligence" data-zh="客户尽调" data-tw="客戶盡調">客户尽调</h3>
+<p data-en="We conduct full client due diligence for every customer and compliance risk controls for every collection and payout—keeping transactions smooth and funds safer." data-zh="为每一位客户进行完整的客户尽调，为每一笔收付款进行合规风控，保障客户交易顺畅，资金更安全。" data-tw="為每一位客戶進行完整的客戶盡調，為每一筆收付款進行合規風控，保障客戶交易順暢，資金更安全。">为每一位客户进行完整的客户尽调，为每一笔收付款进行合规风控，保障客户交易顺畅，资金更安全。</p>
 </article>
 <article class="cmp-item">
-<h3 data-en="Anti-Money Laundering" data-zh="AML" data-tw="AML">AML</h3>
+<h3 data-en="Risk Review" data-zh="风控审查" data-tw="風控審查">风控审查</h3>
 <p data-en="Establish an anti-money laundering system and suspicious transaction identification process, reporting per regulatory requirements." data-zh="建立AML制度与可疑交易识别流程，配合监管要求报送。" data-tw="建立AML制度與可疑交易識別流程，配合監管要求報送。">建立AML制度与可疑交易识别流程，配合监管要求报送。</p>
 </article>
 </div>
@@ -59,7 +84,6 @@
 <section class="section cmp-section cmp-section--soft" id="privacy">
 <div class="container">
 <div class="cmp-head">
-<span class="cmp-kicker" data-en="Data Security" data-zh="数据安全" data-tw="數據安全">数据安全</span>
 <h2 data-en="Protect Your Data &amp; Privacy" data-zh="保护你的数据与隐私" data-tw="保護你的數據與隱私">保护你的数据与隐私</h2>
 </div>
 <div class="cmp-security-grid">
@@ -80,48 +104,36 @@
 <p data-en="Continuously monitor and periodically assess the system to detect and handle anomalies promptly." data-zh="对系统进行安全监测与定期评估，及时发现并处置异常。" data-tw="對系統進行安全監測與定期評估，及時發現並處置異常。">对系统进行安全监测与定期评估，及时发现并处置异常。</p>
 </article>
 </div>
-<p class="cmp-note" data-en="Note: The above describes general security practices. If your company holds specific certifications (e.g., ISO 27001, SOC 2), please add them here with certificates." data-zh="说明：以上为通用安全实践描述。如贵司已取得具体认证（如 ISO 27001、SOC 2 等），请在此处如实补充并附证书。" data-tw="說明：以上爲通用安全實踐描述。如貴司已取得具體認證（如 ISO 27001、SOC 2 等），請在此處如實補充並附證書。">说明：以上为通用安全实践描述。如贵司已取得具体认证（如 ISO 27001、SOC 2 等），请在此处如实补充并附证书。</p>
 </div>
 </section>
 
 <!-- ===== 风控体系 ===== -->
-<section class="section cmp-section">
+<section class="section cmp-section" id="risk">
 <div class="container">
-<div class="cmp-head cmp-head--left">
-<span class="cmp-kicker" data-en="Risk Control System" data-zh="风控体系" data-tw="風控體系">风控体系</span>
+<div class="cmp-split">
+<div class="cmp-copy">
 <h2 data-en="Multi-layer Risk Control, Safeguarding Every Fund" data-zh="多层风控，守护每笔资金" data-tw="多層風控，守護每筆資金">多层风控，守护每笔资金</h2>
-<p data-en="From onboarding to transactions, corresponding controls are set at key stages." data-zh="从开户到交易，关键环节设置相应控制措施。" data-tw="從開戶到交易，關鍵環節設置相應控制措施。">从开户到交易，关键环节设置相应控制措施。</p>
+<p data-en="From onboarding to transactions, risk controls at every stage give customers greater peace of mind." data-zh="从开户到交易，每个环节为客户进行风控保障，使用更安心" data-tw="從開戶到交易，每個環節為客戶進行風控保障，使用更安心">从开户到交易，每个环节为客户进行风控保障，使用更安心</p>
 </div>
-<ol class="cmp-timeline">
-<li class="cmp-timeline-row">
-<div class="cmp-timeline-meta">
-<strong data-en="01" data-zh="01" data-tw="01">01</strong>
-<span data-en="Access Review" data-zh="准入审核" data-tw="準入審核">准入审核</span>
-</div>
+<div class="cmp-list">
+<article class="cmp-item">
+<h3 data-en="01 · Access Review" data-zh="01 · 准入审核" data-tw="01 · 準入審核">01 · 准入审核</h3>
 <p data-en="Onboarding KYC and business background checks filter out high-risk entities." data-zh="开户 KYC 与业务背景核验，筛除高风险主体。" data-tw="開戶 KYC 與業務背景核驗，篩除高風險主體。">开户 KYC 与业务背景核验，筛除高风险主体。</p>
-</li>
-<li class="cmp-timeline-row">
-<div class="cmp-timeline-meta">
-<strong data-en="02" data-zh="02" data-tw="02">02</strong>
-<span data-en="Transaction Monitoring" data-zh="交易监控" data-tw="交易監控">交易监控</span>
-</div>
+</article>
+<article class="cmp-item">
+<h3 data-en="02 · Transaction Monitoring" data-zh="02 · 交易监控" data-tw="02 · 交易監控">02 · 交易监控</h3>
 <p data-en="Combine rule-based and manual risk identification for transactions." data-zh="对交易进行规则与人工结合的风险识别。" data-tw="對交易進行規則與人工結合的風險識別。">对交易进行规则与人工结合的风险识别。</p>
-</li>
-<li class="cmp-timeline-row">
-<div class="cmp-timeline-meta">
-<strong data-en="03" data-zh="03" data-tw="03">03</strong>
-<span data-en="Exception Review" data-zh="异常复核" data-tw="異常覆核">异常复核</span>
-</div>
+</article>
+<article class="cmp-item">
+<h3 data-en="03 · Exception Review" data-zh="03 · 异常复核" data-tw="03 · 異常覆核">03 · 异常复核</h3>
 <p data-en="Initiate review and necessary restrictions for suspicious transactions." data-zh="对可疑交易启动复核与必要的限制措施。" data-tw="對可疑交易啓動覆核與必要的限制措施。">对可疑交易启动复核与必要的限制措施。</p>
-</li>
-<li class="cmp-timeline-row">
-<div class="cmp-timeline-meta">
-<strong data-en="04" data-zh="04" data-tw="04">04</strong>
-<span data-en="Compliance Reporting" data-zh="合规报送" data-tw="合規報送">合规报送</span>
-</div>
+</article>
+<article class="cmp-item">
+<h3 data-en="04 · Compliance Reporting" data-zh="04 · 合规报送" data-tw="04 · 合規報送">04 · 合规报送</h3>
 <p data-en="Fulfill suspicious transaction identification and reporting obligations per regulatory requirements." data-zh="依监管要求履行可疑交易识别与报送义务。" data-tw="依監管要求履行可疑交易識別與報送義務。">依监管要求履行可疑交易识别与报送义务。</p>
-</li>
-</ol>
+</article>
+</div>
+</div>
 </div>
 </section>
 
@@ -130,7 +142,6 @@
 <div class="container">
 <div class="license-layout">
 <div class="license-copy">
-<span class="license-kicker" data-en="Fund Segregation" data-zh="资金隔离" data-tw="資金隔離">资金隔离</span>
 <h2 data-en="Client Funds Segregated Custody" data-zh="客户资金隔离存放" data-tw="客戶資金隔離存放">客户资金隔离存放</h2>
 <p data-en="Client funds are managed separately from company own funds and held in segregated custody per licence and regulatory requirements, reducing misappropriation risk." data-zh="客户资金与公司自有资金分离管理，按牌照与监管要求以隔离方式存放，降低资金被挪用的风险。" data-tw="客戶資金與公司自有資金分離管理，按牌照與監管要求以隔離方式存放，降低資金被挪用的風險。">客户资金与公司自有资金分离管理，按牌照与监管要求以隔离方式存放，降低资金被挪用的风险。</p>
 <ul class="cmp-fund-points">
@@ -142,31 +153,22 @@
 </div>
 <div class="license-media" aria-hidden="true">
 <figure class="license-figure">
-<img
-  class="license-img"
-  src="/images/compliance-funds.jpg"
-  alt=""
-  width="1200"
-  height="900"
-  loading="lazy"
-  decoding="async"
-/>
+<picture>
+  <source :srcset="complianceFundsWebp" type="image/webp" />
+  <img
+    class="license-img"
+    :src="complianceFundsSrc"
+    alt=""
+    width="1200"
+    height="900"
+    loading="lazy"
+    decoding="async"
+  />
+</picture>
 </figure>
 </div>
 </div>
 </div>
 </section>
-
-<section class="section about-cta-section">
-<div class="container">
-<div class="about-cta">
-<h2 data-en="Still have questions about compliance and security?" data-zh="对合规与安全还有疑问？" data-tw="對合規與安全還有疑問？">对合规与安全还有疑问？</h2>
-<p data-en="We are happy to discuss specific arrangements with clients." data-zh="我们乐于就具体安排与客户沟通说明。" data-tw="我們樂於就具體安排與客戶溝通說明。">我们乐于就具体安排与客户沟通说明。</p>
-<div class="about-cta-actions">
-<a class="btn btn-primary btn-lg" data-en="Contact Us" data-zh="联系我们" data-tw="聯繫我們" href="/contact">联系我们</a>
-<a class="btn btn-outline btn-lg" data-en="View FAQ" data-zh="查看 FAQ" data-tw="查看 FAQ" href="/faq">查看 FAQ</a>
 </div>
-</div>
-</div>
-</section>
 </template>

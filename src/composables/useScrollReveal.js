@@ -31,7 +31,7 @@ export function useScrollReveal(rootRef) {
         group.classList.contains('license-copy')
       const isSplit =
         group.classList.contains('products-split') ||
-        group.classList.contains('why-main')
+        group.classList.contains('why-cards')
       const list =
         isHeroCopy || isSplit
           ? group.querySelectorAll(':scope > .reveal')
@@ -43,7 +43,15 @@ export function useScrollReveal(rootRef) {
       })
     })
 
-    targets.forEach((el) => observer.observe(el))
+    targets.forEach((el) => {
+      const rect = el.getBoundingClientRect()
+      const inView = rect.top < window.innerHeight * 0.92 && rect.bottom > 0
+      if (inView) {
+        el.classList.add('reveal-visible')
+        return
+      }
+      observer.observe(el)
+    })
   }
 
   onMounted(() => observe(rootRef?.value ?? document))

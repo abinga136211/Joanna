@@ -1,6 +1,6 @@
 <script setup>
 import { RouterLink, RouterView, useRouter } from 'vue-router'
-import { apiFetch } from '@/api/client'
+import { apiFetch, clearAdminToken } from '@/api/client'
 import '@/assets/styles/admin.css'
 
 const router = useRouter()
@@ -11,6 +11,7 @@ async function logout() {
   } catch {
     /* ignore */
   }
+  clearAdminToken()
   router.push({ name: 'admin-login' })
 }
 </script>
@@ -22,7 +23,10 @@ async function logout() {
       <nav class="admin-nav">
         <RouterLink :to="{ name: 'admin-tables' }">数据表</RouterLink>
         <RouterLink :to="{ name: 'admin-config' }">系统配置</RouterLink>
+        <RouterLink :to="{ name: 'admin-faq-topics' }">帮助中心</RouterLink>
+        <RouterLink :to="{ name: 'admin-chat-qa' }">客服问答</RouterLink>
         <RouterLink :to="{ name: 'admin-inquiries' }">咨询</RouterLink>
+        <RouterLink :to="{ name: 'admin-email-logs' }">邮件记录</RouterLink>
         <RouterLink :to="{ name: 'admin-jobs' }">岗位</RouterLink>
         <RouterLink :to="{ name: 'admin-applications' }">投递</RouterLink>
       </nav>

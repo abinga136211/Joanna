@@ -17,7 +17,7 @@ const TITLES = {
   about: {
     zh: '关于我们 | ADG PAY',
     tw: '關於我們 | ADG PAY',
-    en: 'About us | ADG PAY',
+    en: 'About Us | ADG PAY',
   },
   compliance: {
     zh: '合规与安全 | ADG PAY',
@@ -38,6 +38,11 @@ const TITLES = {
     zh: '加入我们 | ADG PAY',
     tw: '加入我們 | ADG PAY',
     en: 'Join Us | ADG PAY',
+  },
+  notFound: {
+    zh: '页面未找到 | ADG PAY',
+    tw: '頁面未找到 | ADG PAY',
+    en: 'Page Not Found | ADG PAY',
   },
 }
 
@@ -62,12 +67,12 @@ const NAV_LABELS = {
   },
   en: {
     home: 'Home',
-    products: 'Products & Solutions',
-    about: 'About us',
-    compliance: 'Compliance & Security',
-    faq: 'Help Center',
+    products: 'Products',
+    about: 'About',
+    compliance: 'Compliance',
+    faq: 'Help',
     contact: 'Contact',
-    privacy: 'Join Us',
+    privacy: 'Careers',
   },
 }
 

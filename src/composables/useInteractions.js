@@ -28,21 +28,41 @@ export function useAccordion(rootRef) {
   })
 }
 
-/** Industry tabs on Products page */
+/** Solution tabs on Products page — switch left nav + right panel */
 export function useProductTabs(rootRef) {
-  const active = ref('ecom')
+  const active = ref('b2b')
+
+  function setTab(key, { scroll = false } = {}) {
+    if (!key || !rootRef.value) return
+    active.value = key
+    rootRef.value.querySelectorAll('.scenario-tabs .tab').forEach((t) => {
+      t.classList.toggle('active', t.getAttribute('data-tab') === key)
+      const selected = t.getAttribute('data-tab') === key
+      t.setAttribute('aria-selected', selected ? 'true' : 'false')
+      t.tabIndex = selected ? 0 : -1
+    })
+    rootRef.value.querySelectorAll('[data-solution]').forEach((card) => {
+      card.classList.toggle('is-active', card.getAttribute('data-solution') === key)
+    })
+    rootRef.value.querySelectorAll('.panel').forEach((p) => {
+      const on = p.getAttribute('data-panel') === key
+      p.classList.toggle('active', on)
+      p.hidden = !on
+    })
+    if (!scroll) return
+    const target =
+      rootRef.value.querySelector(`#solutions`) ||
+      rootRef.value.querySelector(`[data-solution="${key}"]`) ||
+      rootRef.value.querySelector(`#${CSS.escape(key)}`)
+    target?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+  }
 
   function onClick(e) {
-    const tab = e.target.closest('.tab')
+    const tab = e.target.closest('.scenario-tabs .tab')
     if (!tab || !rootRef.value?.contains(tab)) return
     const key = tab.getAttribute('data-tab')
     if (!key) return
-    active.value = key
-    rootRef.value.querySelectorAll('.tab').forEach((t) => t.classList.remove('active'))
-    tab.classList.add('active')
-    rootRef.value.querySelectorAll('.panel').forEach((p) => {
-      p.classList.toggle('active', p.getAttribute('data-panel') === key)
-    })
+    setTab(key, { scroll: false })
   }
 
   onMounted(() => {
@@ -52,5 +72,5 @@ export function useProductTabs(rootRef) {
     rootRef.value?.removeEventListener('click', onClick)
   })
 
-  return { active }
+  return { active, setTab }
 }
